@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <IncludeBuildOutput>false</IncludeBuildOutput>
+	  <Nullable>enable</Nullable>
+	  <ImplicitUsings>true</ImplicitUsings>
+	  <LangVersion>10.0</LangVersion>
+
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <IncludeBuildOutput>false</IncludeBuildOutput>
+	  <!-- NU5128 is a packaging warning when you don't have lib/ref folders. we're a generator, we're never going to have those. -->
+	  <NoWarn>$(NoWarn); NU5128</NoWarn>
+
+	  <PackageVersion>0.0.1-alphaR</PackageVersion>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(CreatePackage)' == 'true'">
+		<PackageReference Include="IncrementalGeneratorSamples.Runtime" Version="0.0.1-alpha" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(CreatePackage)' != 'true'">
+		<ProjectReference Include="../IncrementalGeneratorSamples.Runtime/IncrementalGeneratorSamples.Runtime.csproj" />
+	</ItemGroup>
+
+
+</Project>
