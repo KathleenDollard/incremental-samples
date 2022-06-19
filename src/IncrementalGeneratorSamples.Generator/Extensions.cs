@@ -15,9 +15,9 @@
         public static string AsAlias(this string val)
             => char.ToLowerInvariant(val[0]) + val.Substring(1);
         public static string InQuotes(this string val)
-            => @$"""val""";
+            => @$"""{val}""";
         public static string KebabCase(this string val)
             // this is not particularly performant or correct
-            => string.Join("", val.Select(c => char.IsUpper(c) ? $"-{char.ToLower(c)}" : "c")
+            => string.Join("", val.Select(c => char.IsUpper(c) ? $"-{char.ToLower(c)}" : "c"));
 }
 }

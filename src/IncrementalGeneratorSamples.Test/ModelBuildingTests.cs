@@ -9,60 +9,11 @@ namespace IncrementalGeneratorSamples.Test;
 [UsesVerify]
 public class ModelBuildingTests
 {
-    private const string SimpleClass = @"
-using IncrementalGeneratorSamples.Runtime;
-
-[Command]
-public partial class Command
-{
-    public int Delay { get;  }
-}
-";
-
-    private const string ClassWithXmlComment = @"
-using IncrementalGeneratorSamples.Runtime;
-
-[CommandAttribute]
-public partial class Command
-{
-    /// <summary>
-    /// Delay between lines, specified as milliseconds per character in a line.
-    /// </summary>
-    public int Delay { get;  }
-}
-";
-
-    private const string CompleteClass = @"
-using IncrementalGeneratorSamples.Runtime;
-using System.IO;
-
-#nullable enable
-
-[Command]
-public partial class CompleteCommand
-{
-    /// <summary>
-    /// The file to read and display on the console.
-    /// </summary>
-    public FileInfo? File { get;  }
-
-    /// <summary>
-    /// Delay between lines, specified as milliseconds per character in a line.
-    /// </summary>
-    public int Delay { get;  }
-
-    public int DoWork() 
-    {
-        // do work, such as displaying the file here
-        return 0;
-    }
-}
-";
 
     [Theory]
-    [InlineData(1, SimpleClass)]
-    [InlineData(1, ClassWithXmlComment)]
-    [InlineData(1, CompleteClass)]
+    [InlineData(1, SampleCode.SimpleClass)]
+    [InlineData(1, SampleCode.ClassWithXmlComment)]
+    [InlineData(1, SampleCode.CompleteClass)]
     public void Should_select_attributed_syntax_nodes(int expectedCount, string sourceCode)
     {
         var cancellationToken = new CancellationTokenSource().Token;
@@ -93,7 +44,7 @@ public partial class CompleteCommand
     [Fact]
     public void Should_build_model_from_SimpleClass()
     {
-        var model = GetModelForTesting(SimpleClass); 
+        var model = GetModelForTesting(SampleCode.SimpleClass); 
         Assert.NotNull(model);
         // REVIEW: Is there a better way to quiet the warning left after the NotNull assertion?
         if (model is null) return; // to appease NRT
@@ -106,7 +57,7 @@ public partial class CompleteCommand
     [Fact]
     public void Should_build_model_from_CompleteClass()
     {
-        var model = GetModelForTesting(CompleteClass);
+        var model = GetModelForTesting(SampleCode.CompleteClass);
         Assert.NotNull(model);
         if (model is null) return; // to appease 
         Assert.Equal("CompleteCommand", model.CommandName);
@@ -120,7 +71,7 @@ public partial class CompleteCommand
     [Fact]
     public void Should_include_Xml_description_in_model()
     {
-        var model = GetModelForTesting(ClassWithXmlComment);
+        var model = GetModelForTesting(SampleCode.ClassWithXmlComment);
         Assert.NotNull(model);
         if (model is null) return; // to appease 
         Assert.Equal("Command", model.CommandName);
