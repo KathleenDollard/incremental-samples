@@ -18,17 +18,19 @@ public class ModelBuilder
         => syntaxNode is ClassDeclarationSyntax cls &&
             cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
 
-    public static GenerationModel? GetModel(GeneratorSyntaxContext generatorContext,
+    public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
                                             CancellationToken cancellationToken)
         => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
 
-    public static GenerationModel? GetModel(SyntaxNode syntaxNode,
+    public static CommandModel? GetModel(SyntaxNode syntaxNode,
                                             SemanticModel semanticModel,
                                             CancellationToken cancellationToken)
     {
         var symbol = semanticModel.GetDeclaredSymbol(syntaxNode, cancellationToken);
         if (symbol is not ITypeSymbol typeSymbol)
         { return null; }
+
+        var description = GetXmlDescription(symbol.GetDocumentationCommentXml());
 
         var properties = typeSymbol.GetMembers().OfType<IPropertySymbol>();
         var options = new List<OptionModel>();
@@ -38,15 +40,13 @@ public class ModelBuilder
             // REVIEW: Should this return null or throw?
             if (cancellationToken.IsCancellationRequested)
             { return null; }
-            var description = GetPropertyDescription(property);
-            options.Add(new OptionModel(property.Name, property.Type.ToString(), description));
+            var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
+            options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
         }
-        return new GenerationModel(typeSymbol.Name, options);
+        return new CommandModel(typeSymbol.Name,description, options);
 
-        static string GetPropertyDescription(IPropertySymbol prop)
+        static string GetXmlDescription(string? doc)
         {
-            // REVIEW: Not crazy about the repeated Parsing of small things.
-            var doc = prop.GetDocumentationCommentXml();
             if (string.IsNullOrEmpty(doc))
             { return ""; }
             var xDoc = XDocument.Parse(doc);
