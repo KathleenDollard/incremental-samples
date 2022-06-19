@@ -18,11 +18,11 @@ public class ModelBuilder
         => syntaxNode is ClassDeclarationSyntax cls &&
             cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
 
-    public static GenerationModel? GetModel(GeneratorSyntaxContext generatorContext,
+    public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
                                             CancellationToken cancellationToken)
         => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
 
-    public static GenerationModel? GetModel(SyntaxNode syntaxNode,
+    public static CommandModel? GetModel(SyntaxNode syntaxNode,
                                             SemanticModel semanticModel,
                                             CancellationToken cancellationToken)
     {
@@ -41,7 +41,7 @@ public class ModelBuilder
             var description = GetPropertyDescription(property);
             options.Add(new OptionModel(property.Name, property.Type.ToString(), description));
         }
-        return new GenerationModel(typeSymbol.Name, options);
+        return new CommandModel(typeSymbol.Name, options);
 
         static string GetPropertyDescription(IPropertySymbol prop)
         {

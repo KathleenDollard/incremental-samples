@@ -13,10 +13,10 @@ namespace IncrementalGeneratorSamples;
 
 public class CodeOutput
 {
-    public static string FileName(GenerationModel? modelData)
+    public static string FileName(CommandModel? modelData)
         => $"{modelData?.CommandName}.g.cs";
 
-    public static string GeneratedCode(GenerationModel? modelData)
+    public static string GenerateCommandCode(CommandModel? modelData)
     {
         if (modelData is null)
         { return ""; }
@@ -74,22 +74,22 @@ public partial class {modelData.CommandName}
 }}
 ";
         static string Parameters(IEnumerable<OptionModel> options)
-            => string.Join(", ", options.Select(o => $"{o.Type} {o.Name.AsField()}"));
+            => string.Join(", ", options.Select(o => $"{o.Type} {o.Name.AsField()}");
 
         static string CtorAssignments(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
+            => string.Join("/n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
 
         static string OptionFields(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option;"));
+            => string.Join("/n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option;"));
 
         static string OptionCreate(IEnumerable<OptionModel> options)
-            => string.Join("\n            ", options.Select(o => $"{o.Name.AsField()}Option = new Option<{o.Type}>({o.Name.AsAlias().InQuotes()}, {o.Description.InQuotes()});"));
+            => string.Join("/n        ", options.Select(o => $"{o.Name.AsField()}Option = new Option<{o.Type}>({o.Name.AsAlias().InQuotes()}, {o.Description.InQuotes()});"));
 
         static string OptionAssign(IEnumerable<OptionModel> options)
-            => string.Join("\n            ", options.Select(o => $"RootCommand.AddOption({o.Name.AsField()}Option);"));
+            => string.Join("/n        ", options.Select(o => $"RootCommand.AddOption({o.Name.AsField()}Option);"));
 
         static string CommandParams(IEnumerable<OptionModel> options)
-            => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsField()}Option, commandResult)"));
+            => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsField()}Option, commandResult);"));
     }
 
 }

@@ -10,17 +10,25 @@ public class Generator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext initContext)
     {
-        var modelDataValues = initContext.SyntaxProvider
+        var commandModelValues = initContext.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: ModelBuilder.IsSyntaxInteresting,
                 transform: ModelBuilder.GetModel)
             .Where(static m => m is not null)!;
 
+        var rootCommandValue = commandModelValues.Collect();
+
         initContext.RegisterSourceOutput(
-            modelDataValues,
+            commandModelValues,
             static (context, modelData) =>
                     context.AddSource(CodeOutput.FileName(modelData),
-                                      CodeOutput.GeneratedCode(modelData)));
+                                      CodeOutput.GenerateCommandCode(modelData)));
+
+        initContext.RegisterSourceOutput(
+            rootCommandValue,
+            static (context, modelData) =>
+                    context.AddSource("Root.g.cs",
+                                      CodeOutput.GenerateRootCode(modelData)));
 
     }
 

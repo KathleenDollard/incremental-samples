@@ -1,32 +1,26 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
 
 namespace TestExample;
 
-public partial class Command
+public partial class ReadFile
 {
-    public Command(FileInfo? file, int delay)
+    public ReadFile(FileInfo? file)
     {
         File = file;
-        Delay = delay;
     }
 
-    public static void Invoke(string[] args)
-        => CommandHandler.Invoke(args);
-
-    internal class CommandHandler : IncrementalGeneratorSamples.Runtime.CommandHandler<CommandHandler>
+    internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        private Option<FileInfo?> fileOption;
-        private Option<int> delayOption;
+        private Option<FileInfo?> fileOption= new Option<FileInfo?>("--file", "The file to read and display on the console.");
 
         public CommandHandler()
+            : base("read-file", "Output the contens of a file to the console.")
         {
-            fileOption = new Option<FileInfo?>("--file", "The file to read and display on the console.");
-            delayOption = new Option<int>("--delay", "Delay between lines, specified as milliseconds per character in a line.");
-            RootCommand.AddOption(fileOption);
-            RootCommand.AddOption(delayOption);
+            SystemCommandLineCommand.AddOption(fileOption);
         }
 
         /// <summary>
@@ -36,7 +30,7 @@ public partial class Command
         public override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new Command(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(delayOption, commandResult));
+            var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
             return command.DoWork();
         }
 

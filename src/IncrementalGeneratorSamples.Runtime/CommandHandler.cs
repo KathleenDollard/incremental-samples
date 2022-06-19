@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Text;
+using System.ComponentModel.Design;
 using System.Threading.Tasks;
 
 namespace IncrementalGeneratorSamples.Runtime
@@ -12,28 +11,34 @@ namespace IncrementalGeneratorSamples.Runtime
     public abstract class CommandHandler<TCommandHandler> : ICommandHandler
         where TCommandHandler : CommandHandler<TCommandHandler>, new()
     {
-        public CommandHandler()
+
+        public static CommandHandler<TCommandHandler> GetHandler()
+            => new TCommandHandler();
+
+        protected CommandHandler(string name, string description = "")
         {
-            RootCommand = new RootCommand();
-            RootCommand.Handler = this;
+            SystemCommandLineCommand = new Command(name, description)
+            {
+                Handler = this
+            };
         }
 
-        protected RootCommand RootCommand { get; }
+        public Command SystemCommandLineCommand { get; private set; }
 
         public static int Invoke(string[] args)
-            => new TCommandHandler().RootCommand.Invoke(args);
+            => new TCommandHandler().SystemCommandLineCommand.Invoke(args);
 
         public static async Task<int> InvokeAsync(string[] args)
-            => await new TCommandHandler().RootCommand.InvokeAsync(args);
+            => await new TCommandHandler().SystemCommandLineCommand.InvokeAsync(args);
 
         protected static TSymbol GetValueForSymbol<TSymbol>(IValueDescriptor<TSymbol> symbol, CommandResult result)
             => symbol switch
-               {
-                   // nullable warnings are ignored because GetValueForArgument returns the default for the option
-                   Argument<TSymbol> argument => result.GetValueForArgument(argument)!,
-                   Option<TSymbol> option => result.GetValueForOption(option)!,
-                   _ => throw new ArgumentOutOfRangeException()
-               };
+            {
+                // nullable warnings are ignored because GetValueForArgument returns the default for the option
+                Argument<TSymbol> argument => result.GetValueForArgument(argument)!,
+                Option<TSymbol> option => result.GetValueForOption(option)!,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         /// <summary>
         /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.

@@ -1,9 +1,9 @@
 ﻿namespace IncrementalGeneratorSamples.Models;
 
-public record GenerationModel
+public record CommandModel
 {
-
-    public GenerationModel(string commandName, IEnumerable<OptionModel> options)
+    private List<CommandModel> commands = new();
+    public CommandModel(string commandName, IEnumerable<OptionModel> options)
     {
         CommandName = commandName;
         Options = options;
@@ -13,8 +13,9 @@ public record GenerationModel
 
 
     public IEnumerable<OptionModel> Options { get; }
+    public IEnumerable<CommandModel> SubCommands => commands;
 
-    public virtual bool Equals(GenerationModel model)
+    public virtual bool Equals(CommandModel model)
         => model is not null && 
             model.CommandName == CommandName &&
             model.Options.SequenceEqual(this.Options);

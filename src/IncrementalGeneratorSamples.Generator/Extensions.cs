@@ -1,13 +1,9 @@
-﻿namespace IncrementalGeneratorSamples
+﻿using Microsoft.CodeAnalysis;
+
+namespace IncrementalGeneratorSamples
 {
     internal static class Extensions
     {
-        public static IEnumerable<TItem> WhereNotNull<TItem>(this IEnumerable<TItem> enumerable)
-              => enumerable is null
-                    ? Enumerable.Empty<TItem>()
-                    : enumerable.Where(item => item is not null);
-
-
         public static string AsProperty(this string val)
            => char.ToUpperInvariant(val[0]) + val.Substring(1);
         public static string AsField(this string val)

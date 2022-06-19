@@ -74,7 +74,7 @@ public partial class Command
                 new OptionModel("File","FileInfo?","The file to read and display on the console"),
                 new OptionModel("Delay","int","Delay between lines, specified as milliseconds per character in a line."),
             };
-            var model = new GenerationModel("Command", properties);
+            var model = new CommandModel("Command", properties);
             var output = CodeOutput.GeneratedCode(model);
 
             Assert.Equal( expectedOutput.Replace("\r\n","\n"), output.Replace("\r\n", "\n"));
@@ -89,7 +89,7 @@ public partial class Command
                 new OptionModel("File","FileInfo?","The file to read and display on the console"),
                 new OptionModel("Delay","int","Delay between lines, specified as milliseconds per character in a line."),
             };
-            var model = new GenerationModel("Command", Enumerable.Empty<OptionModel>());
+            var model = new CommandModel("Command", Enumerable.Empty<OptionModel>());
             var output = CodeOutput.FileName(model);
 
             Assert.Equal("Command.g.cs", output);
