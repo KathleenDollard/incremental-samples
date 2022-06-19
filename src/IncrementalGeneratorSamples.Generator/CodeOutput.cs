@@ -24,11 +24,6 @@ namespace TestExample;
 
 public partial class {modelData.CommandName}
 {{
-    public {modelData.CommandName}({Parameters(modelData.Options)})
-    {{
-        {CtorAssignments(modelData.Options)}
-    }}
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {{
         {OptionFields(modelData.Options)}

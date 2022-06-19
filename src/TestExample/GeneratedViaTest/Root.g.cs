@@ -1,26 +1,18 @@
-﻿using System.CommandLine;
-using System.CommandLine.Invocation;
+﻿using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
 
 namespace TestExample;
 
-public partial class ReadFile
+public partial class Root
 {
-    public ReadFile(FileInfo? file)
+    internal class CommandHandler : RootCommandHandler<CommandHandler>
     {
-        File = file;
-    }
-
-    internal class CommandHandler : CommandHandler<CommandHandler>
-    {
-        private Option<FileInfo?> fileOption= new Option<FileInfo?>("--file", "The file to read and display on the console.");
-
         public CommandHandler()
-            : base("read-file", "Output the contens of a file to the console.")
         {
-            SystemCommandLineCommand.AddOption(fileOption);
+            SystemCommandLineCommand.Add(AddLine.CommandHandler.GetHandler().SystemCommandLineCommand);
+            SystemCommandLineCommand.Add(ReadFile.CommandHandler.GetHandler().SystemCommandLineCommand);
         }
 
         /// <summary>
@@ -29,9 +21,8 @@ public partial class ReadFile
         /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
         public override int Invoke(InvocationContext invocationContext)
         {
-            var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
-            return command.DoWork();
+            Console.WriteLine("Enter one of the commands. Use '-h' to get a list of available commands");
+            return 1;
         }
 
         /// <summary>
@@ -44,5 +35,4 @@ public partial class ReadFile
             throw new NotImplementedException();
         }
     }
-
 }

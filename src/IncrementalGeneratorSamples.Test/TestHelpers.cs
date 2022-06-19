@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics;
 using System.Reflection;
 using Xunit;
@@ -41,7 +42,7 @@ public class TestHelpers
     private static Compilation CreateInputCompilation<TGenerator>(OutputKind outputKind, SyntaxTree[] syntaxTrees)
     {
         // REVIEW: Is there a better way to get the references
-        System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
         var references = assemblies
             .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
             .Select(_ => MetadataReference.CreateFromFile(_.Location))
@@ -50,10 +51,22 @@ public class TestHelpers
                 MetadataReference.CreateFromFile(typeof(TGenerator).Assembly.Location),
                 //MetadataReference.CreateFromFile(typeof(EnumExtensionsAttribute).Assembly.Location)
             });
+
+        var newUsings = new UsingDirectiveSyntax[] {
+            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.IO")),
+            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Collections.Generic")),
+            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Linq")),
+            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System")) };
+
+        var updatedSyntaxTrees = syntaxTrees
+            .Select(x => x.GetCompilationUnitRoot().AddUsings(newUsings).SyntaxTree);
+
         return CSharpCompilation.Create("compilation",
-                    syntaxTrees,
+                    updatedSyntaxTrees,
                     references,
-                    new CSharpCompilationOptions(outputKind));
+                    new CSharpCompilationOptions(outputKind,
+                                                 //mainTypeName: "TestExample.Program",
+                                                 nullableContextOptions: NullableContextOptions.Enable));
     }
 }
 
