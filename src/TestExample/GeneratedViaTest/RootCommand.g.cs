@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using System.CommandLine.Invocation;
+﻿using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
@@ -13,7 +12,7 @@ public partial class RootCommand
 
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        public CommandHandler() : base("")
+        public CommandHandler() : base(string.Empty)
         {
             SystemCommandLineCommand.Add(AddLine.CommandHandler.GetHandler().SystemCommandLineCommand);
             SystemCommandLineCommand.Add(ReadFile.CommandHandler.GetHandler().SystemCommandLineCommand);
@@ -39,5 +38,4 @@ public partial class RootCommand
             throw new NotImplementedException();
         }
     }
-
 }

@@ -3,17 +3,19 @@
 public record CommandModel
 {
     private List<CommandModel> commands = new();
-    public CommandModel(string commandName, IEnumerable<OptionModel> options)
+    public CommandModel(string commandName, string description, IEnumerable<OptionModel> options)
     {
         CommandName = commandName;
+        Description = description;
         Options = options;
     }
 
     public string CommandName { get; }
 
+    public string Description { get; }
+
 
     public IEnumerable<OptionModel> Options { get; }
-    public IEnumerable<CommandModel> SubCommands => commands;
 
     public virtual bool Equals(CommandModel model)
         => model is not null && 

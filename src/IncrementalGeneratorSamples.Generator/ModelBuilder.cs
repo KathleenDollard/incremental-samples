@@ -30,6 +30,8 @@ public class ModelBuilder
         if (symbol is not ITypeSymbol typeSymbol)
         { return null; }
 
+        var description = GetXmlDescription(symbol.GetDocumentationCommentXml());
+
         var properties = typeSymbol.GetMembers().OfType<IPropertySymbol>();
         var options = new List<OptionModel>();
         foreach (var property in properties)
@@ -38,15 +40,13 @@ public class ModelBuilder
             // REVIEW: Should this return null or throw?
             if (cancellationToken.IsCancellationRequested)
             { return null; }
-            var description = GetPropertyDescription(property);
-            options.Add(new OptionModel(property.Name, property.Type.ToString(), description));
+            var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
+            options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
         }
-        return new CommandModel(typeSymbol.Name, options);
+        return new CommandModel(typeSymbol.Name,description, options);
 
-        static string GetPropertyDescription(IPropertySymbol prop)
+        static string GetXmlDescription(string? doc)
         {
-            // REVIEW: Not crazy about the repeated Parsing of small things.
-            var doc = prop.GetDocumentationCommentXml();
             if (string.IsNullOrEmpty(doc))
             { return ""; }
             var xDoc = XDocument.Parse(doc);

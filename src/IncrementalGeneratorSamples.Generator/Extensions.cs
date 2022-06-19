@@ -13,7 +13,9 @@ namespace IncrementalGeneratorSamples
         public static string InQuotes(this string val)
             => @$"""{val}""";
         public static string KebabCase(this string val)
+        {
             // this is not particularly performant or correct
-            => string.Join("", val.Select(c => char.IsUpper(c) ? $"-{char.ToLower(c)}" : "c"));
-}
+            return char.ToLower(val[0]).ToString() + string.Join("", val.Skip(1).Select(c => char.IsUpper(c) ? $"-{char.ToLower(c)}" : c.ToString()));
+        }
+    }
 }

@@ -28,7 +28,7 @@ public class Generator : IIncrementalGenerator
             rootCommandValue,
             static (context, modelData) =>
                     context.AddSource("Root.g.cs",
-                                      CodeOutput.GenerateRootCode(modelData)));
+                                      CodeOutput.GenerateRootCommandCode(modelData)));
 
     }
 

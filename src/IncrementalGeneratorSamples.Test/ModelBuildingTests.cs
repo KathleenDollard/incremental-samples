@@ -19,11 +19,14 @@ public partial class Command
 }
 ";
 
-    private const string ClassWithXmlComment = @"
+    private const string ClassWithXmlComments = @"
 using IncrementalGeneratorSamples.Runtime;
 
+/// <summary>
+/// The file to output to the console.
+/// </summary>
 [CommandAttribute]
-public partial class Command
+public partial class ReadFile
 {
     /// <summary>
     /// Delay between lines, specified as milliseconds per character in a line.
@@ -61,7 +64,7 @@ public partial class CompleteCommand
 
     [Theory]
     [InlineData(1, SimpleClass)]
-    [InlineData(1, ClassWithXmlComment)]
+    [InlineData(1, ClassWithXmlComments)]
     [InlineData(1, CompleteClass)]
     public void Should_select_attributed_syntax_nodes(int expectedCount, string sourceCode)
     {
@@ -120,10 +123,11 @@ public partial class CompleteCommand
     [Fact]
     public void Should_include_Xml_description_in_model()
     {
-        var model = GetModelForTesting(ClassWithXmlComment);
+        var model = GetModelForTesting(ClassWithXmlComments);
         Assert.NotNull(model);
         if (model is null) return; // to appease 
-        Assert.Equal("Command", model.CommandName);
+        Assert.Equal("ReadFile", model.CommandName);
+        Assert.Equal("The file to output to the console.", model.Description);
         Assert.Single(model.Options);
         Assert.Equal("Delay between lines, specified as milliseconds per character in a line.", model.Options.First().Description);
     }
