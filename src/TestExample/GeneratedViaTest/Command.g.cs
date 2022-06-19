@@ -24,8 +24,8 @@ public partial class Command
         public CommandHandler()
         {
             fileOption = new Option<FileInfo?>("--file", "The file to read and display on the console.");
-            RootCommand.AddOption(fileOption);
             delayOption = new Option<int>("--delay", "Delay between lines, specified as milliseconds per character in a line.");
+            RootCommand.AddOption(fileOption);
             RootCommand.AddOption(delayOption);
         }
 
