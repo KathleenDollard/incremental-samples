@@ -9,6 +9,7 @@ namespace IncrementalGeneratorSamples.IntegrationTests
         internal static string examplePath = Path.Combine(Environment.CurrentDirectory, @$"../../../../TestExample");
 
         private Compilation outputCompilation;
+        private IEnumerable<SyntaxTree> generatedSyntaxTrees;
         
         public GenerateAndRunTests()
         { 
@@ -24,17 +25,32 @@ namespace IncrementalGeneratorSamples.IntegrationTests
             var (outputCompilation, outputTrees, outputDiagnostics) = TestHelpers.GenerateTrees<Generator>(inputCompilation);
             Assert.NotNull(outputCompilation);
             Assert.Empty(outputDiagnostics);
-            Assert.Equal(3, outputTrees.Count());
+            Assert.Equal(5, outputTrees.Count());
 
             this.outputCompilation = outputCompilation;
+            generatedSyntaxTrees = outputTrees;
+
+            OutputFiles(generatedSyntaxTrees);
+        }
+
+        private static void OutputFiles(IEnumerable<SyntaxTree> generatedSyntaxTrees)
+        {
+            foreach(var tree in generatedSyntaxTrees)
+            {
+                var filePath = Path.Combine(examplePath,
+                                            "OverwrittenInTests",
+                                            Path.GetFileName(tree.FilePath));
+                File.WriteAllText(filePath, tree.ToString());
+            }
         }
 
         [Fact]
         public void Can_compile_generated_code()
         {
-            var process = IntegrationHelpers.TestOutputCompiles(examplePath);
-            var output = process?.StandardOutput.ReadToEnd();
-            // dotnet puts errors in standard out, so use that to debug.
+            var (exitCode, output, err) = IntegrationHelpers.TestOutputCompiles(examplePath);
+            Assert.DoesNotContain("error", output);
+            Assert.Empty(err);  // dotnet puts errors in standard out, so this is only helpful if that changes.
+            Assert.Equal(0,exitCode);
         }
     }
 }

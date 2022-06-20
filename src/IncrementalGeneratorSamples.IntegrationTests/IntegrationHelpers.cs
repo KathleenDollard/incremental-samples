@@ -4,7 +4,7 @@ namespace IncrementalGeneratorSamples.IntegrationTests
 {
     public class IntegrationHelpers
     {
-        public static Process? TestOutputCompiles(string projectPath)
+        public static (int exitCode, string output, string err) TestOutputCompiles(string projectPath)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             ////startInfo.CreateNoWindow = false;
@@ -16,16 +16,25 @@ namespace IncrementalGeneratorSamples.IntegrationTests
             startInfo.Arguments = "build";
             Process? exeProcess = Process.Start(startInfo);
             Assert.NotNull(exeProcess);
-            if (exeProcess is not null)
+
+            try
             {
-                exeProcess.WaitForExit(10000);
-
-                Assert.Equal(0, exeProcess.ExitCode);
-                Assert.Equal("", (string?)exeProcess.StandardError.ReadToEnd());
+                if (exeProcess is not null)
+                {
+                    var err = exeProcess.StandardError.ReadToEnd();
+                    var output = exeProcess.StandardOutput.ReadToEnd();
+                    var exitCode = exeProcess.ExitCode;
+                    exeProcess.WaitForExit(5000);
+                    return (exitCode, output, err);
+                }
+                throw new InvalidOperationException("Process not started correctly.");
             }
-
-            return exeProcess;
+            catch
+            {
+                throw;
+            }
         }
+
         public static string? RunGeneratedProject(string projectPath, string arguments)
         {
 
@@ -41,8 +50,8 @@ namespace IncrementalGeneratorSamples.IntegrationTests
             Assert.NotNull(exeProcess);
             if (exeProcess is not null)
             {
-                exeProcess.WaitForExit();
-
+                if (exeProcess.WaitForExit(10000))
+                { throw new TimeoutException("Timeout in dotnet build."); }
                 var output = exeProcess.StandardOutput.ReadToEnd();
                 var error = exeProcess.StandardError.ReadToEnd();
 
@@ -56,6 +65,6 @@ namespace IncrementalGeneratorSamples.IntegrationTests
                 => Environment.OSVersion.Platform == PlatformID.Unix
                     ? unixString
                     : windowsString;
-                    }
+        }
     }
 }

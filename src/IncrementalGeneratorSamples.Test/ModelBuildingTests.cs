@@ -37,7 +37,6 @@ public partial class ReadFile
 
     private const string CompleteClass = @"
 using IncrementalGeneratorSamples.Runtime;
-using System.IO;
 
 #nullable enable
 

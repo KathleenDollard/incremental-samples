@@ -24,7 +24,7 @@ public partial class ReadFile
             var (outputCompilation, trees, outputDiagnostics) = TestHelpers.GenerateTrees<Generator>(inputCompilation);
             Assert.NotNull(outputCompilation);
             Assert.Empty(outputDiagnostics);
-            Assert.Equal(2,trees.Count());
+            Assert.Equal(4,trees.Count());
         }
     }
 }

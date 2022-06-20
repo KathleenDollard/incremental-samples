@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
@@ -6,29 +6,17 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace TestExample;
 
-
-public partial class AddLine
+public partial class RootCommand
 {
-    public AddLine(FileInfo? file, string line)
-    {
-        File = file;
-        Line = line;
-    }
+    public static void Invoke(string[] args)
+        => CommandHandler.Invoke(args);
 
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : RootCommandHandler<CommandHandler>
     {
-        private Option<FileInfo?> fileOption = new Option<FileInfo?>(
-            "--file",
-            "The file to read and display on the console.");
-        private Option<string> lineOption = new Option<string>(
-            "--delay",
-            "Delay between lines, specified as milliseconds per character in a line.");
-
-        public CommandHandler()
-            : base("add-line", "Add a new line to a file.")
+        public CommandHandler() : base(string.Empty)
         {
-            SystemCommandLineCommand.AddOption(fileOption);
-            SystemCommandLineCommand.AddOption(lineOption);             
+            SystemCommandLineCommand.Add(ReadFile.CommandHandler.GetHandler().SystemCommandLineCommand);
+            SystemCommandLineCommand.Add(AddLine.CommandHandler.GetHandler().SystemCommandLineCommand);
         }
 
         /// <summary>
@@ -37,10 +25,8 @@ public partial class AddLine
         /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
         public override int Invoke(InvocationContext invocationContext)
         {
-            var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new AddLine(GetValueForSymbol(fileOption, commandResult),
-                                      GetValueForSymbol(lineOption, commandResult));
-            return command.DoWork();
+            Console.WriteLine("Enter one of the commands. Use '-h' to get a list of available commands");
+            return 1;
         }
 
         /// <summary>
@@ -53,5 +39,4 @@ public partial class AddLine
             throw new NotImplementedException();
         }
     }
-
 }

@@ -7,11 +7,11 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <Compile Remove="ExpectedOutputNotCompiled\**" />
-	  <EmbeddedResource Remove="ExpectedOutputNotCompiled\**" />
-	  <None Remove="ExpectedOutputNotCompiled\**" />
-	</ItemGroup>
+	<!--<ItemGroup>
+	  <Compile Remove="OverwrittenInTests\**" />
+	  <EmbeddedResource Remove="OverwrittenInTests\**" />
+	  <None Remove="OverwrittenInTests\**" />
+	</ItemGroup>-->
 
 	<ItemGroup>
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
@@ -20,5 +20,9 @@
 	<ItemGroup>
 		<ProjectReference Include="..\IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj" />
 	</ItemGroup>
+
+	<!--<ItemGroup>
+	  <Folder Include="OverwrittenInTests\" />
+	</ItemGroup>-->
 
 </Project>

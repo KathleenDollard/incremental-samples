@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+
+using System.CommandLine;
 
 namespace TestExample
 {

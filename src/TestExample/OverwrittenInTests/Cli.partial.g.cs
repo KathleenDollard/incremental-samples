@@ -1,10 +1,11 @@
-﻿namespace TestExample
+
+namespace TestExample
 {
     internal partial class Cli
     {
         static partial void SetRootCommand()
         {
-            var rootHandler = Root.CommandHandler.GetHandler();
+            var rootHandler = RootCommand.CommandHandler.GetHandler();
             rootCommand = rootHandler.SystemCommandLineRoot;
         }
     }

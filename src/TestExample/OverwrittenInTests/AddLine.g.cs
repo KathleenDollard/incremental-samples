@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+
+using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
@@ -6,21 +7,18 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace TestExample;
 
-public partial class ReadFile
+public partial class AddLine
 {
-    public ReadFile(FileInfo? file)
-    {
-        File = file;
-    }
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        private Option<FileInfo?> fileOption= new Option<FileInfo?>("--file", "The file to read and display on the console.");
+        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("file", "The file to read and display on the console.");
+        Option<string> lineOption = new Option<string>("line", "Delay between lines, specified as milliseconds per character in a line.");
 
         public CommandHandler()
-            : base("read-file", "Output the contens of a file to the console.")
+            : base("--add-line", "")
         {
             SystemCommandLineCommand.AddOption(fileOption);
+            SystemCommandLineCommand.AddOption(lineOption);
         }
 
         /// <summary>
@@ -30,7 +28,7 @@ public partial class ReadFile
         public override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
+            var command = new AddLine(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(lineOption, commandResult));
             return command.DoWork();
         }
 
@@ -44,5 +42,4 @@ public partial class ReadFile
             throw new NotImplementedException();
         }
     }
-
 }
