@@ -5,6 +5,51 @@ namespace IncrementalGeneratorSamples;
 
 public class CodeOutput
 {
+    public const string AlwaysOnCli = @"
+using System.CommandLine;
+
+namespace TestExample
+{
+    internal partial class Cli
+    {
+#pragma warning disable IDE0044 // Add readonly modifier
+        private static System.CommandLine.RootCommand? rootCommand = null;
+#pragma warning restore IDE0044 // Add readonly modifier
+
+        public static void Invoke(string[] args)
+        {
+            SetRootCommand();
+            if (rootCommand is null)
+            { throw new InvalidOperationException(""No classes were mared with the [Command] attribute""); }
+            rootCommand.Invoke(args);
+        }
+
+        static partial void SetRootCommand();
+    }
+}
+";
+
+    public static string PartialCli(IEnumerable<CommandModel> modelData)
+    {
+        if (modelData is null)
+        { return ""; }
+
+        return $@"
+namespace TestExample
+{{
+    internal partial class Cli
+    {{
+        static partial void SetRootCommand()
+        {{
+            var rootHandler = RootCommand.CommandHandler.GetHandler();
+            rootCommand = rootHandler.SystemCommandLineRoot;
+        }}
+    }}
+}}
+";
+    }
+
+
     public static string FileName(CommandModel? modelData)
         => $"{modelData?.CommandName}.g.cs";
 
@@ -24,17 +69,12 @@ namespace TestExample;
 
 public partial class {modelData.CommandName}
 {{
-    public {modelData.CommandName}({Parameters(modelData.Options)})
-    {{
-        {CtorAssignments(modelData.Options)}
-    }}
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {{
         {OptionFields(modelData.Options)}
 
         public CommandHandler()
-            : base(""--{modelData.CommandName.KebabCase()}"", ""{modelData.Description}"")
+            : base(""{modelData.CommandName.KebabCase()}"", ""{modelData.Description}"")
         {{
             {OptionAssign(modelData.Options)}
         }}
@@ -46,7 +86,7 @@ public partial class {modelData.CommandName}
         public override int Invoke(InvocationContext invocationContext)
         {{
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new Command({CommandParams(modelData.Options)});
+            var command = new {modelData.CommandName}({CommandParams(modelData.Options)});
             return command.DoWork();
         }}
 
@@ -69,7 +109,10 @@ public partial class {modelData.CommandName}
             => string.Join("\n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
 
         static string OptionFields(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({o.Name.AsAlias().InQuotes()}, {o.Description.InQuotes()});"));
+            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({OptionAlias (o)}, {o.Description.InQuotes()});"));
+
+        static string OptionAlias(OptionModel option)
+            => $@"""--{option.Name.AsAlias()}""";
 
         static string OptionAssign(IEnumerable<OptionModel> options)
             => string.Join("\n            ", options.Select(o => $"SystemCommandLineCommand.AddOption({o.Name.AsField()}Option);"));
@@ -96,7 +139,7 @@ public partial class RootCommand
     public static void Invoke(string[] args)
         => CommandHandler.Invoke(args);
 
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : RootCommandHandler<CommandHandler>
     {{
         public CommandHandler() : base(string.Empty)
         {{

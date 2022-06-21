@@ -13,7 +13,7 @@ public class ModelBuildingTests
 using IncrementalGeneratorSamples.Runtime;
 
 [Command]
-public partial class Command
+public partial class ReadFile
 {
     public int Delay { get;  }
 }
@@ -37,7 +37,6 @@ public partial class ReadFile
 
     private const string CompleteClass = @"
 using IncrementalGeneratorSamples.Runtime;
-using System.IO;
 
 #nullable enable
 
@@ -100,7 +99,7 @@ public partial class CompleteCommand
         Assert.NotNull(model);
         // REVIEW: Is there a better way to quiet the warning left after the NotNull assertion?
         if (model is null) return; // to appease NRT
-        Assert.Equal("Command", model.CommandName);
+        Assert.Equal("ReadFile", model.CommandName);
         Assert.Single(model.Options);
         Assert.Equal("Delay", model.Options.First().Name);
         Assert.Equal("int", model.Options.First().Type);

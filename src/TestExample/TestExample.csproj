@@ -7,12 +7,28 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<!--<ItemGroup>
+	  <Compile Remove="OverwrittenInTests\**" />
+	  <EmbeddedResource Remove="OverwrittenInTests\**" />
+	  <None Remove="OverwrittenInTests\**" />
+	</ItemGroup>-->
+
 	<ItemGroup>
-	  <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="SimpleFileToRead.txt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<!--<ItemGroup>
+	  <Folder Include="OverwrittenInTests\" />
+	</ItemGroup>-->
 
 </Project>

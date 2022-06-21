@@ -7,11 +7,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExample", "TestExample\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IncrementalGeneratorSamples.Generator", "IncrementalGeneratorSamples.Generator\IncrementalGeneratorSamples.Generator.csproj", "{86449114-3FDE-49B3-B999-B88C5C30A9F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncrementalGeneratorSamples.Runtime", "IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj", "{48486747-F5A9-407F-A099-B6517F6018D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IncrementalGeneratorSamples.Runtime", "IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj", "{48486747-F5A9-407F-A099-B6517F6018D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncrementalGeneratorSamples.Test", "IncrementalGeneratorSamples.Test\IncrementalGeneratorSamples.Test.csproj", "{EF0D8730-2CF6-44C5-81AB-0F90FE7B35D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IncrementalGeneratorSamples.Test", "IncrementalGeneratorSamples.Test\IncrementalGeneratorSamples.Test.csproj", "{EF0D8730-2CF6-44C5-81AB-0F90FE7B35D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncrementalGeneratorSamples.IntegrationTests", "IncrementalGeneratorSamples.IntegrationTests\IncrementalGeneratorSamples.IntegrationTests.csproj", "{69C99EF3-5FBB-4001-8248-2909E573EA5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IncrementalGeneratorSamples.IntegrationTests", "IncrementalGeneratorSamples.IntegrationTests\IncrementalGeneratorSamples.IntegrationTests.csproj", "{69C99EF3-5FBB-4001-8248-2909E573EA5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpectedOutput", "ExpectedOutput", "{08F2F95D-09F8-4159-B2B4-18018FD271C6}"
+	ProjectSection(SolutionItems) = preProject
+		TestExample\GeneratedViaTest\AddLine.partial.g.cs = TestExample\GeneratedViaTest\AddLine.partial.g.cs
+		TestExample\GeneratedViaTest\Cli.cs = TestExample\GeneratedViaTest\Cli.cs
+		TestExample\GeneratedViaTest\Cli.partial.g.cs = TestExample\GeneratedViaTest\Cli.partial.g.cs
+		TestExample\GeneratedViaTest\ReadFile.partial.g.cs = TestExample\GeneratedViaTest\ReadFile.partial.g.cs
+		TestExample\GeneratedViaTest\Root.g.cs = TestExample\GeneratedViaTest\Root.g.cs
+		TestExample\ExpectedOutputNotCompiled\RootCommand.g.cs = TestExample\ExpectedOutputNotCompiled\RootCommand.g.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

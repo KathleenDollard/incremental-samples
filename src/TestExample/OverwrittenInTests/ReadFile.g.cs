@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+
+using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
@@ -8,17 +9,12 @@ namespace TestExample;
 
 public partial class ReadFile
 {
-    public ReadFile(FileInfo? file)
-    {
-        File = file;
-    }
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        private Option<FileInfo?> fileOption= new Option<FileInfo?>("--file", "The file to read and display on the console.");
+        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
 
         public CommandHandler()
-            : base("read-file", "Output the contens of a file to the console.")
+            : base("read-file", "")
         {
             SystemCommandLineCommand.AddOption(fileOption);
         }
@@ -44,5 +40,4 @@ public partial class ReadFile
             throw new NotImplementedException();
         }
     }
-
 }

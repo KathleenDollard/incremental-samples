@@ -20,19 +20,13 @@ namespace TestExample;
 
 public partial class ReadFile
 {
-    public ReadFile(FileInfo? file, int delay)
-    {
-        File = file;
-        Delay = delay;
-    }
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        Option<FileInfo?> fileOption = new Option<FileInfo?>(""file"", ""The file to read and display on the console"");
-        Option<int> delayOption = new Option<int>(""delay"", ""Delay between lines, specified as milliseconds per character in a line."");
+        Option<FileInfo?> fileOption = new Option<FileInfo?>(""--file"", ""The file to read and display on the console"");
+        Option<int> delayOption = new Option<int>(""--delay"", ""Delay between lines, specified as milliseconds per character in a line."");
 
         public CommandHandler()
-            : base(""--read-file"", """")
+            : base(""read-file"", """")
         {
             SystemCommandLineCommand.AddOption(fileOption);
             SystemCommandLineCommand.AddOption(delayOption);
@@ -45,7 +39,7 @@ public partial class ReadFile
         public override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new Command(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(delayOption, commandResult));
+            var command = new ReadFile(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(delayOption, commandResult));
             return command.DoWork();
         }
 
@@ -75,7 +69,7 @@ public partial class RootCommand
     public static void Invoke(string[] args)
         => CommandHandler.Invoke(args);
 
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : RootCommandHandler<CommandHandler>
     {
         public CommandHandler() : base(string.Empty)
         {

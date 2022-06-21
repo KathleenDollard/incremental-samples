@@ -1,6 +1,4 @@
 ﻿using IncrementalGeneratorSamples.Runtime;
-using System.Drawing;
-using System.IO;
 
 namespace TestExample;
 
@@ -10,12 +8,17 @@ namespace TestExample;
 /// </summary>
 public partial class ReadFile
 {
+    internal ReadFile(FileInfo? file)
+    {
+        File = file;
+    }
+
     /// <summary>
     /// The file to read and display on the console.
     /// </summary>
-    public FileInfo? File { get;  }
+    public FileInfo? File { get; }
 
-    public int DoWork() 
+    public int DoWork()
     {
         if (File is null)
         { return 1; }
@@ -34,6 +37,12 @@ public partial class ReadFile
 /// </summary>
 public partial class AddLine
 {
+    internal AddLine(FileInfo? file, string line)
+    {
+        File = file;
+        Line = line;
+    }
+
     /// <summary>
     /// The file to read and display on the console.
     /// </summary>

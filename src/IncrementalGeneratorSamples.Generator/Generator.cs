@@ -10,6 +10,10 @@ public class Generator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext initContext)
     {
+
+        initContext.RegisterPostInitializationOutput((postinitContext) =>
+            postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
+
         var commandModelValues = initContext.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: ModelBuilder.IsSyntaxInteresting,
@@ -29,6 +33,12 @@ public class Generator : IIncrementalGenerator
             static (context, modelData) =>
                     context.AddSource("Root.g.cs",
                                       CodeOutput.GenerateRootCommandCode(modelData)));
+
+        initContext.RegisterSourceOutput(
+           rootCommandValue,
+           static (context, modelData) =>
+                   context.AddSource("Cli.Partial.g.cs",
+                                     CodeOutput.PartialCli(modelData)));
 
     }
 

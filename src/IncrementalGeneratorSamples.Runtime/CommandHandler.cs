@@ -23,6 +23,12 @@ namespace IncrementalGeneratorSamples.Runtime
             };
         }
 
+        protected CommandHandler(Command command)
+        {
+            command.Handler = this;
+            SystemCommandLineCommand = command;
+        }
+
         public Command SystemCommandLineCommand { get; private set; }
 
         public static int Invoke(string[] args)
@@ -53,5 +59,24 @@ namespace IncrementalGeneratorSamples.Runtime
         public abstract Task<int> InvokeAsync(InvocationContext invocationContext);
 
 
+    }
+
+    public abstract class RootCommandHandler<TCommandHandler> : CommandHandler<TCommandHandler>
+        where TCommandHandler : RootCommandHandler<TCommandHandler>, new()
+    {
+
+        public new static RootCommandHandler<TCommandHandler> GetHandler()
+            => new TCommandHandler();
+
+        protected RootCommandHandler(string description = "")
+            : base(new RootCommand(description))
+        { }
+
+        public RootCommand SystemCommandLineRoot
+            => SystemCommandLineCommand switch
+                {
+                    RootCommand root => root,
+                    _ => throw new InvalidOperationException("The root command may have been reset.")
+                };
     }
 }

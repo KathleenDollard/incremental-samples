@@ -1,4 +1,5 @@
-﻿using System.CommandLine.Invocation;
+
+using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
@@ -10,12 +11,12 @@ public partial class RootCommand
     public static void Invoke(string[] args)
         => CommandHandler.Invoke(args);
 
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : RootCommandHandler<CommandHandler>
     {
         public CommandHandler() : base(string.Empty)
         {
-            SystemCommandLineCommand.Add(AddLine.CommandHandler.GetHandler().SystemCommandLineCommand);
             SystemCommandLineCommand.Add(ReadFile.CommandHandler.GetHandler().SystemCommandLineCommand);
+            SystemCommandLineCommand.Add(AddLine.CommandHandler.GetHandler().SystemCommandLineCommand);
         }
 
         /// <summary>

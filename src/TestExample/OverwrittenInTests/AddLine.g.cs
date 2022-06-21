@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+
+using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
@@ -6,29 +7,18 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace TestExample;
 
-
 public partial class AddLine
 {
-    public AddLine(FileInfo? file, string line)
-    {
-        File = file;
-        Line = line;
-    }
-
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        private Option<FileInfo?> fileOption = new Option<FileInfo?>(
-            "--file",
-            "The file to read and display on the console.");
-        private Option<string> lineOption = new Option<string>(
-            "--delay",
-            "Delay between lines, specified as milliseconds per character in a line.");
+        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+        Option<string> lineOption = new Option<string>("--line", "Delay between lines, specified as milliseconds per character in a line.");
 
         public CommandHandler()
-            : base("add-line", "Add a new line to a file.")
+            : base("add-line", "")
         {
             SystemCommandLineCommand.AddOption(fileOption);
-            SystemCommandLineCommand.AddOption(lineOption);             
+            SystemCommandLineCommand.AddOption(lineOption);
         }
 
         /// <summary>
@@ -38,8 +28,7 @@ public partial class AddLine
         public override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new AddLine(GetValueForSymbol(fileOption, commandResult),
-                                      GetValueForSymbol(lineOption, commandResult));
+            var command = new AddLine(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(lineOption, commandResult));
             return command.DoWork();
         }
 
@@ -53,5 +42,4 @@ public partial class AddLine
             throw new NotImplementedException();
         }
     }
-
 }
