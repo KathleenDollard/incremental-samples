@@ -74,7 +74,7 @@ public partial class {modelData.CommandName}
         {OptionFields(modelData.Options)}
 
         public CommandHandler()
-            : base(""--{modelData.CommandName.KebabCase()}"", ""{modelData.Description}"")
+            : base(""{modelData.CommandName.KebabCase()}"", ""{modelData.Description}"")
         {{
             {OptionAssign(modelData.Options)}
         }}
@@ -109,7 +109,10 @@ public partial class {modelData.CommandName}
             => string.Join("\n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
 
         static string OptionFields(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({o.Name.AsAlias().InQuotes()}, {o.Description.InQuotes()});"));
+            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({OptionAlias (o)}, {o.Description.InQuotes()});"));
+
+        static string OptionAlias(OptionModel option)
+            => $@"""--{option.Name.AsAlias()}""";
 
         static string OptionAssign(IEnumerable<OptionModel> options)
             => string.Join("\n            ", options.Select(o => $"SystemCommandLineCommand.AddOption({o.Name.AsField()}Option);"));

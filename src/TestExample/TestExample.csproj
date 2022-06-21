@@ -21,6 +21,12 @@
 		<ProjectReference Include="..\IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="SimpleFileToRead.txt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 	<!--<ItemGroup>
 	  <Folder Include="OverwrittenInTests\" />
 	</ItemGroup>-->

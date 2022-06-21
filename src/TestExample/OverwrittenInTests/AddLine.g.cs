@@ -11,11 +11,11 @@ public partial class AddLine
 {
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("file", "The file to read and display on the console.");
-        Option<string> lineOption = new Option<string>("line", "Delay between lines, specified as milliseconds per character in a line.");
+        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+        Option<string> lineOption = new Option<string>("--line", "Delay between lines, specified as milliseconds per character in a line.");
 
         public CommandHandler()
-            : base("--add-line", "")
+            : base("add-line", "")
         {
             SystemCommandLineCommand.AddOption(fileOption);
             SystemCommandLineCommand.AddOption(lineOption);

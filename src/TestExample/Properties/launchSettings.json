@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestExample": {
+      "commandName": "Project",
+      "commandLineArgs": "read-file -h"
+    }
+  }
+}

@@ -22,11 +22,11 @@ public partial class ReadFile
 {
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        Option<FileInfo?> fileOption = new Option<FileInfo?>(""file"", ""The file to read and display on the console"");
-        Option<int> delayOption = new Option<int>(""delay"", ""Delay between lines, specified as milliseconds per character in a line."");
+        Option<FileInfo?> fileOption = new Option<FileInfo?>(""--file"", ""The file to read and display on the console"");
+        Option<int> delayOption = new Option<int>(""--delay"", ""Delay between lines, specified as milliseconds per character in a line."");
 
         public CommandHandler()
-            : base(""--read-file"", """")
+            : base(""read-file"", """")
         {
             SystemCommandLineCommand.AddOption(fileOption);
             SystemCommandLineCommand.AddOption(delayOption);

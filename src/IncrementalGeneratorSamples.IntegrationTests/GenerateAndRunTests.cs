@@ -4,9 +4,11 @@ using System.Reflection.Emit;
 
 namespace IncrementalGeneratorSamples.IntegrationTests
 {
+    [TestCaseOrderer("XUnit.Project.Orderers.PriorityOrderer", "XUnit.Project")]
     public class GenerateAndRunTests
     {
-        internal static string examplePath = Path.Combine(Environment.CurrentDirectory, @$"../../../../TestExample");
+        internal static string examplePath = Path.Combine(Environment.CurrentDirectory, @"../../../../TestExample");
+        internal static string exePath = Path.Combine(examplePath, @"bin/Debug/net6.0");
 
         private Compilation outputCompilation;
         private IEnumerable<SyntaxTree> generatedSyntaxTrees;
@@ -45,12 +47,27 @@ namespace IncrementalGeneratorSamples.IntegrationTests
         }
 
         [Fact]
+        [TestPriority(0)]
         public void Can_compile_generated_code()
         {
             var (exitCode, output, err) = IntegrationHelpers.TestOutputCompiles(examplePath);
             Assert.DoesNotContain("error", output);
             Assert.Empty(err);  // dotnet puts errors in standard out, so this is only helpful if that changes.
             Assert.Equal(0,exitCode);
+        }
+
+        [Fact]
+        [TestPriority(1)]
+        public void Can_run_project_based_on_generated_code()
+        {
+            var exeFile = $"{exePath}/TestExample";
+            var args = "read-file --file SimpleFileToRead.txt";
+            var (exitCode, output, err) = IntegrationHelpers.RunGeneratedProject(exePath, exeFile, args);
+
+            Assert.DoesNotContain("error", output);
+            Assert.Empty(err);  // dotnet puts errors in standard out, so this is only helpful if that changes.
+            Assert.Equal(0, exitCode);
+            Assert.Equal("This is a test", output.Replace("\r","").Replace("\n", ""));
         }
     }
 }

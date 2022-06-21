@@ -11,10 +11,10 @@ public partial class ReadFile
 {
     internal class CommandHandler : CommandHandler<CommandHandler>
     {
-        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("file", "The file to read and display on the console.");
+        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
 
         public CommandHandler()
-            : base("--read-file", "")
+            : base("read-file", "")
         {
             SystemCommandLineCommand.AddOption(fileOption);
         }
