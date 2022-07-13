@@ -15,16 +15,18 @@ namespace IncrementalGeneratorSamples.IntegrationTests
         
         public GenerateAndRunTests()
         { 
-            var (inputCompilation, inputDiagnostics) = TestHelpers.GetInputCompilation<Generator>(
+            var inputCompilation = TestHelpers.GetInputCompilation<Generator>(
                 OutputKind.ConsoleApplication,
                 File.ReadAllText(Path.Combine(examplePath, "Commands.cs")),
                 File.ReadAllText(Path.Combine(examplePath, "Program.cs")));
             // We need to ignore the diagnostic that points to code we will always generate (PostIniti...)
-            Assert.NotNull(inputCompilation);
+            var inputDiagnostics = TestHelpers.ErrorAndWarnings(inputCompilation);
             Assert.Single(inputDiagnostics.Where(diagnostic => diagnostic.Id == "CS0103"));
             Assert.Empty(inputDiagnostics.Where(diagnostic => diagnostic.Id != "CS0103"));
 
-            var (outputCompilation, outputTrees, outputDiagnostics) = TestHelpers.GenerateTrees<Generator>(inputCompilation);
+            var (outputCompilation, runResult) = TestHelpers.GenerateTrees<Generator>(inputCompilation);
+            var outputTrees = runResult.GeneratedTrees;
+            var outputDiagnostics = TestHelpers.ErrorAndWarnings(runResult.Diagnostics);
             Assert.NotNull(outputCompilation);
             Assert.Empty(outputDiagnostics);
             Assert.Equal(5, outputTrees.Count());

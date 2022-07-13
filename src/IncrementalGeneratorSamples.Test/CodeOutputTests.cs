@@ -3,12 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IncrementalGeneratorSamples.Test
 {
     public class CodeOutputTests
     {
+        private CancellationToken cancellationToken = new CancellationTokenSource().Token;
+
         private string expectedCommandOutput = @"
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -119,7 +122,7 @@ public partial class RootCommand
                 new OptionModel("Delay","int","Delay between lines, specified as milliseconds per character in a line."),
             };
             var model = new CommandModel("ReadFile", "", properties);
-            var output = CodeOutput.GenerateCommandCode(model);
+            var output = CodeOutput.GenerateCommandCode(model, cancellationToken);
 
             Assert.Equal(expectedCommandOutput.Replace("\r\n", "\n"), output.Replace("\r\n", "\n"));
 
@@ -133,7 +136,7 @@ public partial class RootCommand
                 new CommandModel("ReadFile","Output dile to the console.", Enumerable.Empty<OptionModel>()),
                 new CommandModel("AddLine","Add a line to a file.", Enumerable.Empty<OptionModel>())
             };
-            var output = CodeOutput.GenerateRootCommandCode(commands);
+            var output = CodeOutput.GenerateRootCommandCode(commands, cancellationToken);
 
             Assert.Equal(expectedRootCommandOutput.Replace("\r\n", "\n"), output.Replace("\r\n", "\n"));
 
