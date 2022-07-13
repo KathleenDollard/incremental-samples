@@ -14,10 +14,6 @@ public class Generator : IIncrementalGenerator
                 transform: ModelBuilder.GetModel)
             .Where(static m => m is not null)!;
 
-       // IncrementalValuesProvider<Models.CommandModel?> x = initContext.SyntaxProvider.
-       IDeclared
-  
-
         IncrementalValueProvider<System.Collections.Immutable.ImmutableArray<Models.CommandModel?>> rootCommandValue = commandModelValues.Collect();
 
         initContext.RegisterPostInitializationOutput((postinitContext) =>
