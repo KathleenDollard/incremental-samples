@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
-using IncrementalGeneratorSamples.Models;
 
 namespace IncrementalGeneratorSamples;
 
@@ -11,34 +8,38 @@ public class Generator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext initContext)
     {
 
-        initContext.RegisterPostInitializationOutput((postinitContext) =>
-            postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
-
-        var commandModelValues = initContext.SyntaxProvider
+        IncrementalValuesProvider<Models.CommandModel?> commandModelValues = initContext.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: ModelBuilder.IsSyntaxInteresting,
                 transform: ModelBuilder.GetModel)
             .Where(static m => m is not null)!;
 
-        var rootCommandValue = commandModelValues.Collect();
+       // IncrementalValuesProvider<Models.CommandModel?> x = initContext.SyntaxProvider.
+       IDeclared
+  
 
-        initContext.RegisterSourceOutput(
-            commandModelValues,
-            static (context, modelData) =>
-                    context.AddSource(CodeOutput.FileName(modelData),
-                                      CodeOutput.GenerateCommandCode(modelData)));
+        IncrementalValueProvider<System.Collections.Immutable.ImmutableArray<Models.CommandModel?>> rootCommandValue = commandModelValues.Collect();
 
-        initContext.RegisterSourceOutput(
-            rootCommandValue,
-            static (context, modelData) =>
-                    context.AddSource("Root.g.cs",
-                                      CodeOutput.GenerateRootCommandCode(modelData)));
+        initContext.RegisterPostInitializationOutput((postinitContext) =>
+            postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
 
         initContext.RegisterSourceOutput(
            rootCommandValue,
-           static (context, modelData) =>
-                   context.AddSource("Cli.Partial.g.cs",
-                                     CodeOutput.PartialCli(modelData)));
+           static (outputContext, modelData) =>
+                   outputContext.AddSource("Cli.Partial.g.cs",
+                                     CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
+
+        initContext.RegisterSourceOutput(
+            commandModelValues,
+            static (outputContext, modelData) =>
+                    outputContext.AddSource(CodeOutput.FileName(modelData),
+                                      CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
+
+        initContext.RegisterSourceOutput(
+            rootCommandValue,
+            static (outputContext, modelData) =>
+                    outputContext.AddSource("Root.g.cs",
+                                      CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
 
     }
 

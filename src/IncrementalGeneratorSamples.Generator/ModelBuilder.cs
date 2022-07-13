@@ -19,12 +19,12 @@ public class ModelBuilder
             cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
 
     public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
-                                            CancellationToken cancellationToken)
+                                         CancellationToken cancellationToken)
         => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
 
     public static CommandModel? GetModel(SyntaxNode syntaxNode,
-                                            SemanticModel semanticModel,
-                                            CancellationToken cancellationToken)
+                                         SemanticModel semanticModel,
+                                         CancellationToken cancellationToken)
     {
         var symbol = semanticModel.GetDeclaredSymbol(syntaxNode, cancellationToken);
         if (symbol is not ITypeSymbol typeSymbol)
@@ -37,9 +37,7 @@ public class ModelBuilder
         foreach (var property in properties)
         {
             // since we do not know how big this list is, so we will check cancellation token
-            // REVIEW: Should this return null or throw?
-            if (cancellationToken.IsCancellationRequested)
-            { return null; }
+            cancellationToken.ThrowIfCancellationRequested();
             var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
             options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
         }

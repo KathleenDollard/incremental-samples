@@ -29,7 +29,7 @@ namespace TestExample
 }
 ";
 
-    public static string PartialCli(IEnumerable<CommandModel> modelData)
+    public static string PartialCli(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
     {
         if (modelData is null)
         { return ""; }
@@ -53,7 +53,7 @@ namespace TestExample
     public static string FileName(CommandModel? modelData)
         => $"{modelData?.CommandName}.g.cs";
 
-    public static string GenerateCommandCode(CommandModel? modelData)
+    public static string GenerateCommandCode(CommandModel? modelData, CancellationToken cancellationToken)
     {
         if (modelData is null)
         { return ""; }
@@ -121,7 +121,7 @@ public partial class {modelData.CommandName}
             => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsField()}Option, commandResult)"));
     }
 
-    public static string GenerateRootCommandCode(IEnumerable<CommandModel> modelData)
+    public static string GenerateRootCommandCode(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
     {
         if (modelData is null)
         { return ""; }

@@ -78,9 +78,9 @@ public partial class CompleteCommand
     private CommandModel? GetModelForTesting(string sourceCode)
     {
         var cancellationToken = new CancellationTokenSource().Token;
-        var (compilation, diagnostics) = TestHelpers.GetInputCompilation<Generator>(
+        var compilation = TestHelpers.GetInputCompilation<Generator>(
                 OutputKind.DynamicallyLinkedLibrary, sourceCode);
-        Assert.Empty(diagnostics);
+        Assert.Empty(TestHelpers.ErrorAndWarnings(compilation));
         var tree = compilation.SyntaxTrees.Single();
         var matches = tree.GetRoot()
             .DescendantNodes()
