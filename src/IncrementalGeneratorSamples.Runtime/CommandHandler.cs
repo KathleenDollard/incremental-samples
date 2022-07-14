@@ -3,7 +3,6 @@ using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.ComponentModel.Design;
 using System.Threading.Tasks;
 
 namespace IncrementalGeneratorSamples.Runtime

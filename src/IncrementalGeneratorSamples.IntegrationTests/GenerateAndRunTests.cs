@@ -1,6 +1,5 @@
 ﻿using IncrementalGeneratorSamples.Test;
 using Microsoft.CodeAnalysis;
-using System.Reflection.Emit;
 
 namespace IncrementalGeneratorSamples.IntegrationTests
 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IncrementalGeneratorSamples.Models;
+using Microsoft.CodeAnalysis;
 
 namespace IncrementalGeneratorSamples;
 
@@ -11,7 +12,7 @@ public class Generator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
                 predicate: (_,_) => true,
-                transform: ModelBuilder.GetModelFromAttribute);
+                transform: GetModelFromAttribute);
 
         var rootCommandValue = commandModelValues.Collect();
 
@@ -37,6 +38,11 @@ public class Generator : IIncrementalGenerator
                                       CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
 
     }
+
+    private static CommandModel? GetModelFromAttribute(GeneratorAttributeSyntaxContext generatorContext,
+                                  CancellationToken cancellationToken)
+     => ModelBuilder.GetModel(generatorContext.TargetNode, generatorContext.TargetSymbol, generatorContext.SemanticModel, cancellationToken);
+
 
 }
 

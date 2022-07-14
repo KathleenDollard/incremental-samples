@@ -1,11 +1,9 @@
 ﻿
+using IncrementalGeneratorSamples.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.CodeDom.Compiler;
-using System.Diagnostics;
 using System.Reflection;
-using Xunit;
 
 namespace IncrementalGeneratorSamples.Test;
 
@@ -56,6 +54,32 @@ public class TestHelpers
         var runResult = driver.GetRunResult();
         return (compilation, runResult);
     }
+
+
+    public static CommandModel? GetModelForTesting(string sourceCode)
+    {
+        var cancellationToken = new CancellationTokenSource().Token;
+        var compilation = GetInputCompilation<Generator>(
+                OutputKind.DynamicallyLinkedLibrary, sourceCode);
+        Assert.Empty(ErrorAndWarnings(compilation));
+        var tree = compilation.SyntaxTrees.Single();
+        var matches = tree.GetRoot()
+            .DescendantNodes()
+            .Where(node => IsSyntaxInteresting(node, cancellationToken));
+        Assert.Single(matches);
+        var syntaxNode = matches.Single();
+        var semanticModel = compilation.GetSemanticModel(tree);
+        var symbol = semanticModel.GetDeclaredSymbol(syntaxNode);
+        return ModelBuilder.GetModel(syntaxNode,
+                                     symbol,
+                                     semanticModel,
+                                     cancellationToken);
+    }
+
+    public static bool IsSyntaxInteresting(SyntaxNode syntaxNode, CancellationToken _)
+    => syntaxNode is ClassDeclarationSyntax cls &&
+        cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
+
 
     public static IEnumerable<Diagnostic> ErrorAndWarnings(Compilation compilation)
      => ErrorAndWarnings(compilation.GetDiagnostics());

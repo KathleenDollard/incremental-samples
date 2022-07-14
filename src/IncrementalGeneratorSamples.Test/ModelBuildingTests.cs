@@ -1,8 +1,5 @@
-using IncrementalGeneratorSamples;
-using IncrementalGeneratorSamples.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Threading;
 
 namespace IncrementalGeneratorSamples.Test;
 
@@ -71,34 +68,16 @@ public partial class CompleteCommand
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
         var matches = tree.GetRoot()
             .DescendantNodes()
-            .Where(node => ModelBuilder.IsSyntaxInteresting(node, cancellationToken));
+            .Where(node => TestHelpers.IsSyntaxInteresting(node, cancellationToken));
         Assert.Equal(expectedCount, matches.Count());
     }
 
-    private CommandModel? GetModelForTesting(string sourceCode)
-    {
-        var cancellationToken = new CancellationTokenSource().Token;
-        var compilation = TestHelpers.GetInputCompilation<Generator>(
-                OutputKind.DynamicallyLinkedLibrary, sourceCode);
-        Assert.Empty(TestHelpers.ErrorAndWarnings(compilation));
-        var tree = compilation.SyntaxTrees.Single();
-        var matches = tree.GetRoot()
-            .DescendantNodes()
-            .Where(node => ModelBuilder.IsSyntaxInteresting(node, cancellationToken));
-        Assert.Single(matches);
-        var syntaxNode = matches.Single();
-var  semanticModel = compilation.GetSemanticModel(tree);
-        var symbol =semanticModel.GetDeclaredSymbol(syntaxNode);
-        return ModelBuilder.GetModel(syntaxNode,
-                                     symbol,
-                                     semanticModel,
-                                     cancellationToken);
-    }
+
 
     [Fact]
     public void Should_build_model_from_SimpleClass()
     {
-        var model = GetModelForTesting(SimpleClass); 
+        var model = TestHelpers.GetModelForTesting(SimpleClass); 
         Assert.NotNull(model);
         // REVIEW: Is there a better way to quiet the warning left after the NotNull assertion?
         if (model is null) return; // to appease NRT
@@ -111,7 +90,7 @@ var  semanticModel = compilation.GetSemanticModel(tree);
     [Fact]
     public void Should_build_model_from_CompleteClass()
     {
-        var model = GetModelForTesting(CompleteClass);
+        var model = TestHelpers.GetModelForTesting(CompleteClass);
         Assert.NotNull(model);
         if (model is null) return; // to appease 
         Assert.Equal("CompleteCommand", model.CommandName);
@@ -125,7 +104,7 @@ var  semanticModel = compilation.GetSemanticModel(tree);
     [Fact]
     public void Should_include_Xml_description_in_model()
     {
-        var model = GetModelForTesting(ClassWithXmlComments);
+        var model = TestHelpers.GetModelForTesting(ClassWithXmlComments);
         Assert.NotNull(model);
         if (model is null) return; // to appease 
         Assert.Equal("ReadFile", model.CommandName);
