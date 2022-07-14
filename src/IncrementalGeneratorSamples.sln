@@ -23,6 +23,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpectedOutput", "ExpectedO
 		TestExample\ExpectedOutputNotCompiled\RootCommand.g.cs = TestExample\ExpectedOutputNotCompiled\RootCommand.g.cs
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FA8C6D4C-4D8C-4D42-8953-BDB9CE22F2C5}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
+		NuGet.config = NuGet.config
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

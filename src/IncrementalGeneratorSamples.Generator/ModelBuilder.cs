@@ -18,17 +18,24 @@ public class ModelBuilder
         => syntaxNode is ClassDeclarationSyntax cls &&
             cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
 
-    public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
-                                         CancellationToken cancellationToken)
-        => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
+    public static CommandModel? GetModelFromAttribute(GeneratorAttributeSyntaxContext generatorContext,
+                                     CancellationToken cancellationToken)
+        => GetModel(generatorContext.TargetNode, generatorContext.TargetSymbol, generatorContext.SemanticModel, cancellationToken);
+
+    //public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
+    //                                     CancellationToken cancellationToken)
+    //    => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
 
     public static CommandModel? GetModel(SyntaxNode syntaxNode,
+                                         ISymbol? symbol,
                                          SemanticModel semanticModel,
                                          CancellationToken cancellationToken)
     {
-        var symbol = semanticModel.GetDeclaredSymbol(syntaxNode, cancellationToken);
         if (symbol is not ITypeSymbol typeSymbol)
         { return null; }
+
+        var attribute = symbol.GetAttributes().First();
+        var x = attribute.AttributeClass?.Name;
 
         var description = GetXmlDescription(symbol.GetDocumentationCommentXml());
 
@@ -41,7 +48,7 @@ public class ModelBuilder
             var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
             options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
         }
-        return new CommandModel(typeSymbol.Name,description, options);
+        return new CommandModel(typeSymbol.Name, description, options);
 
         static string GetXmlDescription(string? doc)
         {
@@ -54,7 +61,7 @@ public class ModelBuilder
                 ?.Value;
             return desc is null
                 ? ""
-                : desc.Replace("\n","").Replace("\r", "").Trim();
+                : desc.Replace("\n", "").Replace("\r", "").Trim();
         }
 
     }

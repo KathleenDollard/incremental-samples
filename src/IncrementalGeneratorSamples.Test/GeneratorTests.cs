@@ -138,6 +138,18 @@ public partial class RootCommand
 }
 ";
 
+
+        [Fact]
+        public void FullyQualifiedName()
+        {
+            var t = typeof(IncrementalGeneratorSamples.Runtime.CommandAttribute);
+            Assert.Equal("IncrementalGeneratorSamples.Runtime.CommandAttribute", t.FullName);
+            Assert.Equal("IncrementalGeneratorSamples.Runtime.CommandAttribute", t.MetadataToken.ToString());
+            Assert.Equal("IncrementalGeneratorSamples.Runtime.CommandAttribute", t.AssemblyQualifiedName);
+
+        }
+
+
         [Fact]
         public void Can_compile_input()
         {

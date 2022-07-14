@@ -7,14 +7,13 @@ public class Generator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext initContext)
     {
+        var commandModelValues = initContext.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
+                predicate: (_,_) => true,
+                transform: ModelBuilder.GetModelFromAttribute);
 
-        IncrementalValuesProvider<Models.CommandModel?> commandModelValues = initContext.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: ModelBuilder.IsSyntaxInteresting,
-                transform: ModelBuilder.GetModel)
-            .Where(static m => m is not null)!;
-
-        IncrementalValueProvider<System.Collections.Immutable.ImmutableArray<Models.CommandModel?>> rootCommandValue = commandModelValues.Collect();
+        var rootCommandValue = commandModelValues.Collect();
 
         initContext.RegisterPostInitializationOutput((postinitContext) =>
             postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));

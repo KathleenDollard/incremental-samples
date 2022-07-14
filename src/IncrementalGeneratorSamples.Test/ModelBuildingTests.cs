@@ -87,8 +87,11 @@ public partial class CompleteCommand
             .Where(node => ModelBuilder.IsSyntaxInteresting(node, cancellationToken));
         Assert.Single(matches);
         var syntaxNode = matches.Single();
+var  semanticModel = compilation.GetSemanticModel(tree);
+        var symbol =semanticModel.GetDeclaredSymbol(syntaxNode);
         return ModelBuilder.GetModel(syntaxNode,
-                                     compilation.GetSemanticModel(tree),
+                                     symbol,
+                                     semanticModel,
                                      cancellationToken);
     }
 
