@@ -3,9 +3,6 @@
   <PropertyGroup>
 	  <TargetFramework>netstandard2.0</TargetFramework>
 	  <IncludeBuildOutput>false</IncludeBuildOutput>
-	  <Nullable>enable</Nullable>
-	  <ImplicitUsings>true</ImplicitUsings>
-	  <LangVersion>10.0</LangVersion>
 
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <IncludeBuildOutput>false</IncludeBuildOutput>

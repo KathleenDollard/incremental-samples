@@ -1,48 +1,61 @@
-﻿using IncrementalGeneratorSamples.Models;
+﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
-using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Threading;
 
-namespace IncrementalGeneratorSamples;
-
-public class ModelBuilder
+namespace IncrementalGeneratorSamples
 {
- 
-    public static CommandModel? GetModel(SyntaxNode syntaxNode,
-                                         ISymbol? symbol,
-                                         SemanticModel semanticModel,
-                                         CancellationToken cancellationToken)
+    public class ModelBuilder
     {
-        if (symbol is not ITypeSymbol typeSymbol)
-        { return null; }
-
-        var attribute = symbol.GetAttributes().First();
-        var x = attribute.AttributeClass?.Name;
-
-        var description = GetXmlDescription(symbol.GetDocumentationCommentXml());
-
-        var properties = typeSymbol.GetMembers().OfType<IPropertySymbol>();
-        var options = new List<OptionModel>();
-        foreach (var property in properties)
+        public static InitialClassModel GetInitialModel(
+                                      ISymbol symbol,
+                                      CancellationToken cancellationToken)
         {
-            // since we do not know how big this list is, so we will check cancellation token
-            cancellationToken.ThrowIfCancellationRequested();
-            var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
-            options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
+            if (!(symbol is ITypeSymbol typeSymbol))
+            { return null; }
+
+            var properties = new List<InitialPropertyModel>();
+            foreach (var property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
+            {
+                // since we do not know how big this list is, so we will check cancellation token
+                cancellationToken.ThrowIfCancellationRequested();
+                properties.Add(new InitialPropertyModel(property.Name,
+                                                     property.GetDocumentationCommentXml(),
+                                                     property.Type.ToString(),
+                                                     property.AttributenamesAndValues()));
+            }
+            return new InitialClassModel(typeSymbol.Name,
+                                         typeSymbol.ContainingNamespace.Name,
+                                         typeSymbol.GetDocumentationCommentXml(),
+                                         typeSymbol.AttributenamesAndValues(),
+                                         properties);
         }
-        return new CommandModel(typeSymbol.Name, description, options);
 
-        static string GetXmlDescription(string? doc)
+        public static CommandModel GetModel(InitialClassModel classModel,
+                                             CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(doc))
-            { return ""; }
-            var xDoc = XDocument.Parse(doc);
-            var desc = xDoc.DescendantNodes()
-                .OfType<XElement>()
-                .FirstOrDefault(x => x.Name == "summary")
-                ?.Value;
-            return desc is null
-                ? ""
-                : desc.Replace("\n", "").Replace("\r", "").Trim();
+            if (classModel is null) { return null; }
+
+            var options = new List<OptionModel>();
+            foreach (var property in classModel.Properties)
+            {
+                // since we do not know how big this list is, so we will check cancellation token
+                cancellationToken.ThrowIfCancellationRequested();
+                options.Add(new OptionModel(
+                    $"{property.Name.AsKebabCase()}",
+                    property.Name,
+                    property.Name.AsPublicSymbol(),
+                    property.Name.AsPrivateSymbol(),
+                    Helpers.GetXmlDescription(property.XmlComments),
+                    property.Type.ToString()));
+            }
+            return new CommandModel(
+                    $"--{classModel.Name.AsKebabCase()}",
+                    classModel.Name,
+                    classModel.Name.AsPublicSymbol(),
+                    classModel.Name.AsPrivateSymbol(),
+                    Helpers.GetXmlDescription(classModel.XmlComments),
+                    options);
         }
 
     }

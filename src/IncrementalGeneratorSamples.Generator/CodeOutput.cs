@@ -1,11 +1,14 @@
-﻿using IncrementalGeneratorSamples.Models;
+﻿using IncrementalGeneratorSamples.InternalModels;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
-namespace IncrementalGeneratorSamples;
-
-
-public class CodeOutput
+namespace IncrementalGeneratorSamples
 {
-    public const string AlwaysOnCli = @"
+
+    public class CodeOutput
+    {
+        public const string AlwaysOnCli = @"
 using System.CommandLine;
 
 namespace TestExample
@@ -29,12 +32,12 @@ namespace TestExample
 }
 ";
 
-    public static string PartialCli(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
-    {
-        if (modelData is null)
-        { return ""; }
+        public static string PartialCli(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
+        {
+            if (modelData is null)
+            { return ""; }
 
-        return $@"
+            return $@"
 namespace TestExample
 {{
     internal partial class Cli
@@ -47,18 +50,18 @@ namespace TestExample
     }}
 }}
 ";
-    }
+        }
 
 
-    public static string FileName(CommandModel? modelData)
-        => $"{modelData?.CommandName}.g.cs";
+        public static string FileName(CommandModel modelData)
+            => $"{modelData?.Name}.g.cs";
 
-    public static string GenerateCommandCode(CommandModel? modelData, CancellationToken cancellationToken)
-    {
-        if (modelData is null)
-        { return ""; }
+        public static string GenerateCommandCode(CommandModel modelData, CancellationToken cancellationToken)
+        {
+            if (modelData is null)
+            { return ""; }
 
-        return $@"
+            return $@"
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
@@ -67,14 +70,14 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace TestExample;
 
-public partial class {modelData.CommandName}
+public partial class {modelData.Name}
 {{
     internal class CommandHandler : CommandHandler<CommandHandler>
     {{
         {OptionFields(modelData.Options)}
 
         public CommandHandler()
-            : base(""{modelData.CommandName.KebabCase()}"", ""{modelData.Description}"")
+            : base(""{modelData.Name.AsKebabCase()}"", ""{modelData.Description}"")
         {{
             {OptionAssign(modelData.Options)}
         }}
@@ -86,7 +89,7 @@ public partial class {modelData.CommandName}
         public override int Invoke(InvocationContext invocationContext)
         {{
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new {modelData.CommandName}({CommandParams(modelData.Options)});
+            var command = new {modelData.Name}({CommandParams(modelData.Options)});
             return command.DoWork();
         }}
 
@@ -102,31 +105,31 @@ public partial class {modelData.CommandName}
     }}
 }}
 ";
-        static string Parameters(IEnumerable<OptionModel> options)
-            => string.Join(", ", options.Select(o => $"{o.Type} {o.Name.AsField()}"));
+            string Parameters(IEnumerable<OptionModel> options)
+                => string.Join(", ", options.Select(o => $"{o.Type} {o.Name.AsField()}"));
 
-        static string CtorAssignments(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
+            string CtorAssignments(IEnumerable<OptionModel> options)
+                => string.Join("\n        ", options.Select(o => $"{o.Name.AsProperty()} = {o.Name.AsField()};"));
 
-        static string OptionFields(IEnumerable<OptionModel> options)
-            => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({OptionAlias (o)}, {o.Description.InQuotes()});"));
+            string OptionFields(IEnumerable<OptionModel> options)
+                => string.Join("\n        ", options.Select(o => $"Option<{o.Type}> {o.Name.AsField()}Option = new Option<{o.Type}>({OptionAlias(o)}, {o.Description.InQuotes()});"));
 
-        static string OptionAlias(OptionModel option)
-            => $@"""--{option.Name.AsAlias()}""";
+            string OptionAlias(OptionModel option)
+                => $@"""--{option.Name.AsAlias()}""";
 
-        static string OptionAssign(IEnumerable<OptionModel> options)
-            => string.Join("\n            ", options.Select(o => $"SystemCommandLineCommand.AddOption({o.Name.AsField()}Option);"));
+            string OptionAssign(IEnumerable<OptionModel> options)
+                => string.Join("\n            ", options.Select(o => $"SystemCommandLineCommand.AddOption({o.Name.AsField()}Option);"));
 
-        static string CommandParams(IEnumerable<OptionModel> options)
-            => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsField()}Option, commandResult)"));
-    }
+            string CommandParams(IEnumerable<OptionModel> options)
+                => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsField()}Option, commandResult)"));
+        }
 
-    public static string GenerateRootCommandCode(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
-    {
-        if (modelData is null)
-        { return ""; }
+        public static string GenerateRootCommandCode(IEnumerable<CommandModel> modelData, CancellationToken cancellationToken)
+        {
+            if (modelData is null)
+            { return ""; }
 
-        return $@"
+            return $@"
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
@@ -169,9 +172,10 @@ public partial class RootCommand
 }}
 ";
 
-        static string CtorAssignments(IEnumerable<CommandModel> options)
-            => string.Join("\n            ", options.Select(c => $"SystemCommandLineCommand.Add({c.CommandName}.CommandHandler.GetHandler().SystemCommandLineCommand);"));
+            string CtorAssignments(IEnumerable<CommandModel> options)
+                => string.Join("\n            ", options.Select(c => $"SystemCommandLineCommand.Add({c.Name}.CommandHandler.GetHandler().SystemCommandLineCommand);"));
+        }
+
+
     }
-
-
 }

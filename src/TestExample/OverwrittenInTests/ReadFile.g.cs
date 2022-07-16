@@ -27,7 +27,7 @@ public partial class ReadFile
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
             var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
-            return command.DoWork();
+            return command.Execute();
         }
 
         /// <summary>

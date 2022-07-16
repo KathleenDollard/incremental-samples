@@ -1,15 +1,20 @@
-﻿namespace IncrementalGeneratorSamples.Models;
-
-public record OptionModel
+﻿namespace IncrementalGeneratorSamples.InternalModels
 {
-    public OptionModel(string name, string type, string description)
+    public class OptionModel : ModelCommon
     {
-        Name = name;
-        Type = type;
-        Description = description;
-    }
+        public OptionModel(string name,
+                           string originalName,
+                           string publicSymbolName,
+                           string privateSymbolName,
+                           string description,
+                           string type)
+        : base(name, originalName, publicSymbolName, privateSymbolName, description)
+        {
+            Type = type;
+        }
 
-    public string Name { get; }
-    public string Type { get; }
-    public string Description { get; }
+        public string Type { get; }
+
+        // Default equality and hash is fine here
+    }
 }

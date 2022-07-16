@@ -4,7 +4,7 @@ namespace TestExample;
 
 [Command]
 /// <summary>
-/// Output the contens of a file to the console.
+/// Output the contents of a file to the console.
 /// </summary>
 public partial class ReadFile
 {
@@ -18,7 +18,7 @@ public partial class ReadFile
     /// </summary>
     public FileInfo? File { get; }
 
-    public int DoWork()
+    public int Execute()
     {
         if (File is null)
         { return 1; }
@@ -53,7 +53,7 @@ public partial class AddLine
     /// </summary>
     public string Line { get; }
 
-    public int DoWork()
+    public int Execute()
     {
         if (Line is null || File is null)
         { return 1; }

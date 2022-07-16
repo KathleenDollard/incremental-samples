@@ -29,7 +29,7 @@ public partial class AddLine
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
             var command = new AddLine(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(lineOption, commandResult));
-            return command.DoWork();
+            return command.Execute();
         }
 
         /// <summary>

@@ -1,48 +1,49 @@
-﻿using IncrementalGeneratorSamples.Models;
+﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
+using System.Threading;
 
-namespace IncrementalGeneratorSamples;
-
-[Generator]
-public class Generator : IIncrementalGenerator
+namespace IncrementalGeneratorSamples
 {
-    public void Initialize(IncrementalGeneratorInitializationContext initContext)
+    [Generator]
+    public class Generator : IIncrementalGenerator
     {
-        var commandModelValues = initContext.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
-                predicate: (_,_) => true,
-                transform: GetModelFromAttribute);
+        public void Initialize(IncrementalGeneratorInitializationContext initContext)
+        {
+            var commandModelValues = initContext.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                    fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
+                    predicate: (_, _1) => true,
+                    transform: GetModelFromAttribute);
 
-        var rootCommandValue = commandModelValues.Collect();
+            var rootCommandValue = commandModelValues.Collect();
 
-        initContext.RegisterPostInitializationOutput((postinitContext) =>
-            postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
+            initContext.RegisterPostInitializationOutput((postinitContext) =>
+                postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
 
-        initContext.RegisterSourceOutput(
-           rootCommandValue,
-           static (outputContext, modelData) =>
-                   outputContext.AddSource("Cli.Partial.g.cs",
-                                     CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
+            initContext.RegisterSourceOutput(
+               rootCommandValue,
+               (outputContext, modelData) =>
+                       outputContext.AddSource("Cli.Partial.g.cs",
+                                         CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
 
-        initContext.RegisterSourceOutput(
-            commandModelValues,
-            static (outputContext, modelData) =>
-                    outputContext.AddSource(CodeOutput.FileName(modelData),
-                                      CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
+            initContext.RegisterSourceOutput(
+                commandModelValues,
+                (outputContext, modelData) =>
+                        outputContext.AddSource(CodeOutput.FileName(modelData),
+                                          CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
 
-        initContext.RegisterSourceOutput(
-            rootCommandValue,
-            static (outputContext, modelData) =>
-                    outputContext.AddSource("Root.g.cs",
-                                      CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
+            initContext.RegisterSourceOutput(
+                rootCommandValue,
+                (outputContext, modelData) =>
+                        outputContext.AddSource("Root.g.cs",
+                                          CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
+
+        }
+
+        private static InitialClassModel GetModelFromAttribute(GeneratorAttributeSyntaxContext generatorContext,
+                                      CancellationToken cancellationToken)
+         => ModelBuilder.GetInitialModel( generatorContext.TargetSymbol,  cancellationToken);
+
 
     }
-
-    private static CommandModel? GetModelFromAttribute(GeneratorAttributeSyntaxContext generatorContext,
-                                  CancellationToken cancellationToken)
-     => ModelBuilder.GetModel(generatorContext.TargetNode, generatorContext.TargetSymbol, generatorContext.SemanticModel, cancellationToken);
-
-
 }
-

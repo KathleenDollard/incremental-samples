@@ -1,4 +1,5 @@
-﻿using IncrementalGeneratorSamples.Models;
+﻿using IncrementalGeneratorSamples.InternalModels;
+using Xunit;
 
 namespace IncrementalGeneratorSamples.Test
 {
@@ -100,7 +101,7 @@ public partial class RootCommand
         [Fact]
         public void Should_have_name_and_description()
         {
-            var model = new CommandModel("ReadFile", "This is a description", Enumerable.Empty<OptionModel>());
+            var model = new CommandModel("ReadFile", description: "This is a description", options: Enumerable.Empty<OptionModel>());
             var output = CodeOutput.FileName(model);
 
             Assert.Equal("ReadFile.g.cs", output);
@@ -115,7 +116,7 @@ public partial class RootCommand
                 new OptionModel("File","FileInfo?","The file to read and display on the console"),
                 new OptionModel("Delay","int","Delay between lines, specified as milliseconds per character in a line."),
             };
-            var model = new CommandModel("ReadFile", "", properties);
+            var model = new CommandModel("ReadFile", description: "", options: properties);
             var output = CodeOutput.GenerateCommandCode(model, cancellationToken);
 
             Assert.Equal(expectedCommandOutput.Replace("\r\n", "\n"), output.Replace("\r\n", "\n"));
@@ -127,8 +128,8 @@ public partial class RootCommand
         {
             var commands = new List<CommandModel>
             {
-                new CommandModel("ReadFile","Output dile to the console.", Enumerable.Empty<OptionModel>()),
-                new CommandModel("AddLine","Add a line to a file.", Enumerable.Empty<OptionModel>())
+                new CommandModel("ReadFile",description: "Output dile to the console.", options: Enumerable.Empty<OptionModel>()),
+                new CommandModel("AddLine",description: "Add a line to a file.", options: Enumerable.Empty<OptionModel>())
             };
             var output = CodeOutput.GenerateRootCommandCode(commands, cancellationToken);
 

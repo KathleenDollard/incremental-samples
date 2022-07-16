@@ -37,13 +37,13 @@ namespace IncrementalGeneratorSamples.Runtime
             => await new TCommandHandler().SystemCommandLineCommand.InvokeAsync(args);
 
         protected static TSymbol GetValueForSymbol<TSymbol>(IValueDescriptor<TSymbol> symbol, CommandResult result)
-            => symbol switch
-            {
-                // nullable warnings are ignored because GetValueForArgument returns the default for the option
-                Argument<TSymbol> argument => result.GetValueForArgument(argument)!,
-                Option<TSymbol> option => result.GetValueForOption(option)!,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+        {
+            if (symbol is Argument<TSymbol> argument)
+            { return result.GetValueForArgument(argument); }
+            if (symbol is Option<TSymbol> option)
+            { return result.GetValueForOption(option); }
+            throw new ArgumentOutOfRangeException();
+        }
 
         /// <summary>
         /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.
@@ -72,10 +72,8 @@ namespace IncrementalGeneratorSamples.Runtime
         { }
 
         public RootCommand SystemCommandLineRoot
-            => SystemCommandLineCommand switch
-                {
-                    RootCommand root => root,
-                    _ => throw new InvalidOperationException("The root command may have been reset.")
-                };
+            => SystemCommandLineCommand is RootCommand root
+                ? root
+                : throw new InvalidOperationException("The root command may have been reset.");
     }
 }
