@@ -1,34 +1,44 @@
-﻿namespace IncrementalGeneratorSamples.Models;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
-public record CommandModel
+namespace IncrementalGeneratorSamples.InternalModels
 {
-    private List<CommandModel> commands = new();
-    public CommandModel(string commandName, string description, IEnumerable<OptionModel> options)
+    public class CommandModel : ModelCommon
     {
-        CommandName = commandName;
-        Description = description;
-        Options = options;
-    }
-
-    public string CommandName { get; }
-
-    public string Description { get; }
-
-
-    public IEnumerable<OptionModel> Options { get; }
-
-    public virtual bool Equals(CommandModel model)
-        => model is not null && 
-            model.CommandName == CommandName &&
-            model.Options.SequenceEqual(this.Options);
-
-    public override int GetHashCode()
-    {
-        var hash = CommandName.GetHashCode();
-        foreach(var prop in Options)
+        private List<CommandModel> commands;
+        public CommandModel(string name,
+                            string originalName,
+                            string symbolName,
+                            string localSymbolName,
+                            IEnumerable<string> aliases,
+                            string description,
+                            string nspace,
+                            IEnumerable<OptionModel> options)
+        : base(name, originalName, symbolName, localSymbolName, aliases, description)
         {
-            hash ^= prop.GetHashCode();
+            commands = new List<CommandModel>();
+            Options = options;
+            Namespace = nspace;
         }
-        return hash;
+
+        public string Namespace { get; }
+        public IEnumerable<OptionModel> Options { get; }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as InitialClassModel);
+        }
+
+        public bool Equals(InitialClassModel other)
+        {   // REVIEW: Does this box individual elements? Do we care if things are strings?
+            return StructuralComparisons.StructuralEqualityComparer.Equals(this, other);
+        }
+
+        public override int GetHashCode()
+        {
+            // REVIEW: Does this box individual elements? Do we care if things are strings?
+            return StructuralComparisons.StructuralEqualityComparer.GetHashCode(this);
+        }
     }
 }

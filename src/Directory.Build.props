@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+	<PropertyGroup>
+		<MicrosoftCodeAnalysisCSharpVersion>4.2.0</MicrosoftCodeAnalysisCSharpVersion>
+		<MicrosoftCodeAnalysisAnalyzersVersion>3.3.3</MicrosoftCodeAnalysisAnalyzersVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PackageVersion>0.0.1-alphaW</PackageVersion>
+		<Version>0.0.1-alphaW</Version>
+	</PropertyGroup>
+</Project>

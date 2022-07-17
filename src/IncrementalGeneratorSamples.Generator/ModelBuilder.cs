@@ -1,61 +1,79 @@
-﻿using IncrementalGeneratorSamples.Models;
+﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
+using System.Linq;
+using System.Threading;
 
-namespace IncrementalGeneratorSamples;
-
-public class ModelBuilder
+namespace IncrementalGeneratorSamples
 {
-    public static bool IsSyntaxInteresting(SyntaxNode syntaxNode, CancellationToken _)
-        // REVIEW: What's the best way to check the qualified name? 
-        // REVIEW: This should be very fast. Is it ok to ignore the cancelation token in that case?
-        // REVIEW: Will this catch all the ways people can use attributes
-        => syntaxNode is ClassDeclarationSyntax cls &&
-            cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
-
-    public static CommandModel? GetModel(GeneratorSyntaxContext generatorContext,
-                                         CancellationToken cancellationToken)
-        => GetModel(generatorContext.Node, generatorContext.SemanticModel, cancellationToken);
-
-    public static CommandModel? GetModel(SyntaxNode syntaxNode,
-                                         SemanticModel semanticModel,
-                                         CancellationToken cancellationToken)
+    public class ModelBuilder
     {
-        var symbol = semanticModel.GetDeclaredSymbol(syntaxNode, cancellationToken);
-        if (symbol is not ITypeSymbol typeSymbol)
-        { return null; }
-
-        var description = GetXmlDescription(symbol.GetDocumentationCommentXml());
-
-        var properties = typeSymbol.GetMembers().OfType<IPropertySymbol>();
-        var options = new List<OptionModel>();
-        foreach (var property in properties)
+        public static InitialClassModel GetInitialModel(
+                                      ISymbol symbol,
+                                      CancellationToken cancellationToken)
         {
-            // since we do not know how big this list is, so we will check cancellation token
-            cancellationToken.ThrowIfCancellationRequested();
-            var propDescription = GetXmlDescription(property.GetDocumentationCommentXml());
-            options.Add(new OptionModel(property.Name, property.Type.ToString(), propDescription));
-        }
-        return new CommandModel(typeSymbol.Name,description, options);
+            if (!(symbol is ITypeSymbol typeSymbol))
+            { return null; }
 
-        static string GetXmlDescription(string? doc)
-        {
-            if (string.IsNullOrEmpty(doc))
-            { return ""; }
-            var xDoc = XDocument.Parse(doc);
-            var desc = xDoc.DescendantNodes()
-                .OfType<XElement>()
-                .FirstOrDefault(x => x.Name == "summary")
-                ?.Value;
-            return desc is null
-                ? ""
-                : desc.Replace("\n","").Replace("\r", "").Trim();
+            var properties = new List<InitialPropertyModel>();
+            foreach (var property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
+            {
+                // since we do not know how big this list is, so we will check cancellation token
+                cancellationToken.ThrowIfCancellationRequested();
+                properties.Add(new InitialPropertyModel(property.Name,
+                                                     property.GetDocumentationCommentXml(),
+                                                     property.Type.ToString(),
+                                                     property.AttributenamesAndValues()));
+            }
+            return new InitialClassModel(typeSymbol.Name,
+                                         typeSymbol.ContainingNamespace.Name,
+                                         typeSymbol.GetDocumentationCommentXml(),
+                                         typeSymbol.AttributenamesAndValues(),
+                                         properties);
         }
 
+        public static CommandModel GetModel(InitialClassModel classModel,
+                                            CancellationToken cancellationToken)
+        {
+            if (classModel is null) { return null; }
+
+            var options = new List<OptionModel>();
+            var aliases = GetAliases(classModel.Attributes);
+            foreach (var property in classModel.Properties)
+            {
+                // since we do not know how big this list is, so we will check cancellation token
+                cancellationToken.ThrowIfCancellationRequested();
+                var optionAliases = GetAliases(property.Attributes);
+                options.Add(new OptionModel(
+                    $"--{property.Name.AsKebabCase()}",
+                    property.Name,
+                    property.Name.AsPublicSymbol(),
+                    property.Name.AsPrivateSymbol(),
+                    optionAliases,
+                    Helpers.GetXmlDescription(property.XmlComments),
+                    property.Type.ToString()));
+            }
+            return new CommandModel(
+                    name: classModel.Name.AsKebabCase(),
+                    originalName: classModel.Name,
+                    symbolName: classModel.Name.AsPublicSymbol(),
+                    localSymbolName: classModel.Name.AsPrivateSymbol(),
+                    aliases,
+                    Helpers.GetXmlDescription(classModel.XmlComments),
+                    classModel.Namespace,
+                    options: options);
+        }
+
+        private static IEnumerable<string> GetAliases(IEnumerable<AttributeValue> attributes)
+        {
+            var aliasAttributes = attributes.Where(x => x.AttributeName == "AliasAttribute");
+            if (!aliasAttributes.Any())
+            { return Enumerable.Empty<string>(); }
+            var aliases = new List<string>();
+            foreach (var attribute in aliasAttributes)
+            { aliases.Add(attribute.Value.ToString()); }
+            return aliases;
+        }
     }
 }

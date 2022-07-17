@@ -1,68 +1,86 @@
 ﻿
+using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.CodeDom.Compiler;
-using System.Diagnostics;
 using System.Reflection;
-using Xunit;
 
-namespace IncrementalGeneratorSamples.Test;
-
-public class TestHelpers
+namespace IncrementalGeneratorSamples.Test
 {
-
-    public static Compilation GetInputCompilation<TGenerator>(OutputKind outputKind, params string[] code)
+    public static class TestHelpers
     {
-        var syntaxTrees = code.Select(x => CSharpSyntaxTree.ParseText(x)).ToArray();
-        var newUsings = new UsingDirectiveSyntax[] {
+        public static CancellationToken CancellationTokenForTesting => new CancellationTokenSource().Token;
+
+        public static Compilation GetInputCompilation<TGenerator>(OutputKind outputKind, params string[] code)
+        {
+            var syntaxTrees = code.Select(x => CSharpSyntaxTree.ParseText(x)).ToArray();
+            var newUsings = new UsingDirectiveSyntax[] {
             SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.IO")),
             SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Collections.Generic")),
             SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Linq")),
             SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System")) };
-        var updatedSyntaxTrees = syntaxTrees
-            .Select(x => x.GetCompilationUnitRoot().AddUsings(newUsings).SyntaxTree);
+            var updatedSyntaxTrees = syntaxTrees
+                .Select(x => x.GetCompilationUnitRoot().AddUsings(newUsings).SyntaxTree);
 
-        // REVIEW: Is there a better way to get the references
-        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var references = assemblies
-            .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
-            .Select(_ => MetadataReference.CreateFromFile(_.Location))
-            .Concat(new[]
-            {
+            // REVIEW: Is there a better way to get the references
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var references = assemblies
+                .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
+                .Select(_ => MetadataReference.CreateFromFile(_.Location))
+                .Concat(new[]
+                {
                 MetadataReference.CreateFromFile(typeof(TGenerator).Assembly.Location),
-            });
+                });
 
-        var compilationOptions = new CSharpCompilationOptions(
-            outputKind,
-            nullableContextOptions: NullableContextOptions.Enable);
+            var compilationOptions = new CSharpCompilationOptions(
+                outputKind,
+                nullableContextOptions: NullableContextOptions.Enable);
 
 
-        return CSharpCompilation.Create("compilation",
-                                        updatedSyntaxTrees,
-                                        references,
-                                        compilationOptions);
+            return CSharpCompilation.Create("compilation",
+                                            updatedSyntaxTrees,
+                                            references,
+                                            compilationOptions);
+        }
+
+        public static (Compilation compilation, GeneratorDriverRunResult runResult)
+            GenerateTrees<TGenerator>(Compilation inputCompilation)
+            where TGenerator : IIncrementalGenerator, new()
+        {
+            var generator = new TGenerator();
+            GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation,
+                out var compilation, out var _);
+
+            var runResult = driver.GetRunResult();
+            return (compilation, runResult);
+        }
+
+        public static IEnumerable<Diagnostic> ErrorAndWarnings(IEnumerable<Diagnostic> diagnostics)
+            => diagnostics.Where(
+                    x => x.Severity == DiagnosticSeverity.Error ||
+                         x.Severity == DiagnosticSeverity.Warning);
+
+        public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
+            GetTransformInfo(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
+        {
+            var cancellationToken = new CancellationTokenSource().Token;
+            var compilation = TestHelpers.GetInputCompilation<Generator>(
+                    OutputKind.DynamicallyLinkedLibrary, sourceCode);
+            var inputDiagnostics = compilation.GetDiagnostics();
+            if (!continueOnInputErrors && TestHelpers.ErrorAndWarnings(inputDiagnostics).Any())
+            { return (null, null, null, cancellationToken, inputDiagnostics); }
+            var tree = compilation.SyntaxTrees.Single();
+            var matchQuery = tree.GetRoot()
+                .DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
+            if (filter is not null)
+            { matchQuery = matchQuery.Where(x => filter(x)); }
+            var matches = matchQuery.ToList();
+            Assert.Single(matches);
+            var syntaxNode = matches.Single();
+            var semanticModel = compilation.GetSemanticModel(tree);
+            return (syntaxNode, semanticModel.GetDeclaredSymbol(syntaxNode), semanticModel, cancellationToken, inputDiagnostics);
+        }
     }
-
-    public static (Compilation compilation, GeneratorDriverRunResult runResult) 
-        GenerateTrees<TGenerator>(Compilation inputCompilation)
-        where TGenerator : IIncrementalGenerator, new()
-    {
-        var generator = new TGenerator();
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, 
-            out var compilation, out var _);
-
-        var runResult = driver.GetRunResult();
-        return (compilation, runResult);
-    }
-
-    public static IEnumerable<Diagnostic> ErrorAndWarnings(Compilation compilation)
-     => ErrorAndWarnings(compilation.GetDiagnostics());
-
-    public static IEnumerable<Diagnostic> ErrorAndWarnings(IEnumerable<Diagnostic> diagnostics) 
-        => diagnostics.Where(
-                x => x.Severity == DiagnosticSeverity.Error ||
-                     x.Severity == DiagnosticSeverity.Warning);
 }
-
