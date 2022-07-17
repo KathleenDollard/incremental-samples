@@ -17,26 +17,26 @@ namespace IncrementalGeneratorSamples
 
             var rootCommandValue = commandModelValues.Collect();
 
-            initContext.RegisterPostInitializationOutput((postinitContext) =>
-                postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
+            //initContext.RegisterPostInitializationOutput((postinitContext) =>
+            //    postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
 
-            initContext.RegisterSourceOutput(
-               rootCommandValue,
-               (outputContext, modelData) =>
-                       outputContext.AddSource("Cli.Partial.g.cs",
-                                         CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
+            //initContext.RegisterSourceOutput(
+            //   rootCommandValue,
+            //   (outputContext, modelData) =>
+            //           outputContext.AddSource("Cli.Partial.g.cs",
+            //                             CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
 
-            initContext.RegisterSourceOutput(
-                commandModelValues,
-                (outputContext, modelData) =>
-                        outputContext.AddSource(CodeOutput.FileName(modelData),
-                                          CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
+            //initContext.RegisterSourceOutput(
+            //    commandModelValues,
+            //    (outputContext, modelData) =>
+            //            outputContext.AddSource(CodeOutput.FileName(modelData),
+            //                              CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
 
-            initContext.RegisterSourceOutput(
-                rootCommandValue,
-                (outputContext, modelData) =>
-                        outputContext.AddSource("Root.g.cs",
-                                          CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
+            //initContext.RegisterSourceOutput(
+            //    rootCommandValue,
+            //    (outputContext, modelData) =>
+            //            outputContext.AddSource("Root.g.cs",
+            //                              CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
 
         }
 

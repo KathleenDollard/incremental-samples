@@ -55,34 +55,6 @@ namespace IncrementalGeneratorSamples.Test
             return (compilation, runResult);
         }
 
-
-        public static CommandModel GetModelForTesting(string sourceCode)
-        {
-            var cancellationToken = new CancellationTokenSource().Token;
-            var compilation = GetInputCompilation<Generator>(
-                    OutputKind.DynamicallyLinkedLibrary, sourceCode);
-            Assert.Empty(ErrorAndWarnings(compilation));
-            var tree = compilation.SyntaxTrees.Single();
-            var matches = tree.GetRoot()
-                .DescendantNodes()
-                .Where(node => IsSyntaxInteresting(node, cancellationToken));
-            Assert.Single(matches);
-            var syntaxNode = matches.Single();
-            var semanticModel = compilation.GetSemanticModel(tree);
-            var symbol = semanticModel.GetDeclaredSymbol(syntaxNode);
-            return ModelBuilder.GetModel(syntaxNode,
-                                         symbol,
-                                         semanticModel,
-                                         cancellationToken);
-        }
-
-        public static bool IsSyntaxInteresting(SyntaxNode syntaxNode, CancellationToken _)
-        => syntaxNode is ClassDeclarationSyntax cls &&
-            cls.AttributeLists.Any(x => x.Attributes.Any(a => a.Name.ToString() == "Command" || a.Name.ToString() == "CommandAttribute"));
-
-        public static IEnumerable<Diagnostic> ErrorAndWarnings(Compilation compilation)
-         => ErrorAndWarnings(compilation.GetDiagnostics());
-
         public static IEnumerable<Diagnostic> ErrorAndWarnings(IEnumerable<Diagnostic> diagnostics)
             => diagnostics.Where(
                     x => x.Severity == DiagnosticSeverity.Error ||

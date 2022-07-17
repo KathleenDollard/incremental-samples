@@ -1,0 +1,34 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments: ,
+      Attributes: []
+    }
+  ],
+  Name: MyClass,
+  XmlComments: ,
+  Attributes: [
+    {
+      AttributeName: CtorValueAttribute,
+      ValueName: positionalString,
+      ValueType: string,
+      value: Okay
+    },
+    {
+      AttributeName: CtorValueAttribute,
+      ValueName: objs,
+      ValueType: object[],
+      value: [
+        1,
+        3,
+        5,
+        [
+          7
+        ]
+      ]
+    }
+  ]
+}

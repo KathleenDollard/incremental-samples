@@ -1,0 +1,46 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments: ,
+      Attributes: [
+        {
+          AttributeName: NamedValueAttribute,
+          ValueName: NamedInt,
+          ValueType: int,
+          value: 43
+        },
+        {
+          AttributeName: NamedValueAttribute,
+          ValueName: NamedStrings,
+          ValueType: string[],
+          value: [
+            D
+          ]
+        }
+      ]
+    }
+  ],
+  Name: MyClass,
+  XmlComments: ,
+  Attributes: [
+    {
+      AttributeName: NamedValueAttribute,
+      ValueName: NamedInt,
+      ValueType: int,
+      value: 42
+    },
+    {
+      AttributeName: NamedValueAttribute,
+      ValueName: NamedStrings,
+      ValueType: string[],
+      value: [
+        A,
+        B,
+        C
+      ]
+    }
+  ]
+}

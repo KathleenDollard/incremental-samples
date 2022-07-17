@@ -38,27 +38,46 @@ namespace IncrementalGeneratorSamples
                 var attributeName = attribute.AttributeClass.Name.ToString();
                 foreach (var pair in attribute.NamedArguments)
                 {
-                    var value = pair.Value.Kind == TypedConstantKind.Array
-                                                    ? pair.Value.Values
-                                                    : pair.Value.Value;
+                    var value = ValuesFromTypedConstant(pair.Value);
                     list.Add(new AttributeValue(attributeName, pair.Key, pair.Value.Type.ToString(), value));
 
                 }
-                var parameters = attribute.AttributeConstructor.Parameters;
-                var args = attribute.ConstructorArguments;
-                for (int i = 0; i < parameters.Length; i++)
+                if (!(attribute.AttributeConstructor is null))
                 {
-                    if (parameters.Length >= i && args.Length >= i)
+                    var parameters = attribute.AttributeConstructor.Parameters;
+                    var args = attribute.ConstructorArguments;
+                    for (int i = 0; i < parameters.Length; i++)
                     {
-                        var value = args[i].Kind == TypedConstantKind.Array
-                                                        ? args[i].Values
-                                                        : args[i].Value;
-                        list.Add(new AttributeValue(attributeName, parameters[i].Name, parameters[i].Type.ToString(), value));
+                        if (parameters.Length >= i && args.Length >= i)
+                        {
+                            var value = ValuesFromTypedConstant(args[i]);
+                            list.Add(new AttributeValue(attributeName, parameters[i].Name, parameters[i].Type.ToString(), value));
+                        }
                     }
                 }
             }
             return list;
         }
+
+        private static object ValuesFromTypedConstant(TypedConstant val, int recursionDepth = 1)
+        {
+            recursionDepth += 1;
+            return val.Kind == TypedConstantKind.Array
+                                            ? ValuesFromTypedConstantArray(val.Values, recursionDepth)
+                                            : val.Value;
+
+            object ValuesFromTypedConstantArray(IEnumerable<TypedConstant> typedConstants, int innerRecursionDepth)
+            {
+                var list = new List<object>();
+                foreach (var typedConstant in typedConstants)
+                {
+                    list.Add(ValuesFromTypedConstant(typedConstant, innerRecursionDepth + 1));
+                }
+                return list.ToArray();
+            }
+        }
+
+
 
         public static string GetXmlDescription(string doc)
         {
