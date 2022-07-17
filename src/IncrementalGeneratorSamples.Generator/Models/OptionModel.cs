@@ -1,14 +1,17 @@
-﻿namespace IncrementalGeneratorSamples.InternalModels
+﻿using System.Collections.Generic;
+
+namespace IncrementalGeneratorSamples.InternalModels
 {
     public class OptionModel : ModelCommon
     {
         public OptionModel(string name,
                            string originalName,
-                           string publicSymbolName,
-                           string privateSymbolName,
+                           string symbolName,
+                           string localSymbolName,
+                           IEnumerable<string> aliases,
                            string description,
                            string type)
-        : base(name, originalName, publicSymbolName, privateSymbolName, description)
+        : base(name, originalName, symbolName, localSymbolName, aliases, description)
         {
             Type = type;
         }

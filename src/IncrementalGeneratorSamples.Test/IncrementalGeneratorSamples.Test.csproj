@@ -30,6 +30,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\IncrementalGeneratorSamples.Generator\IncrementalGeneratorSamples.Generator.csproj" />
+		<ProjectReference Include="..\IncrementalGeneratorSamples.Runtime\IncrementalGeneratorSamples.Runtime.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

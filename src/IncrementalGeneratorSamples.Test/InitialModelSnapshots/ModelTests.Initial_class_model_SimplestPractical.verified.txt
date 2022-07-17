@@ -1,0 +1,10 @@
+﻿{
+  Namespace: MyNamespace,
+  Options: [],
+  Name: my-class,
+  OriginalName: MyClass,
+  SymbolName: MyClass,
+  LocalSymbolName: myClass,
+  Aliases: [],
+  Description: 
+}

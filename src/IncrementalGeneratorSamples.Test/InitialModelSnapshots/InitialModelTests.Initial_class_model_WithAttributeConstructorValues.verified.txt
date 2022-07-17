@@ -10,13 +10,13 @@
           AttributeName: CtorValueAttribute,
           ValueName: positionalString,
           ValueType: string,
-          value: Still Okay
+          Value: Still Okay
         },
         {
           AttributeName: CtorValueAttribute,
           ValueName: ints,
           ValueType: int[],
-          value: [
+          Value: [
             11,
             13
           ]
@@ -31,13 +31,13 @@
       AttributeName: CtorValueAttribute,
       ValueName: positionalString,
       ValueType: string,
-      value: Okay
+      Value: Okay
     },
     {
       AttributeName: CtorValueAttribute,
       ValueName: ints,
       ValueType: int[],
-      value: [
+      Value: [
         1,
         3,
         5,

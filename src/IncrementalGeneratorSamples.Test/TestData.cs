@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IncrementalGeneratorSamples.Test
 {
-    internal class TestData
+    public class TestData
     {
         protected TestData(string inputSourceCode, InitialClassModel initialClassModel, string outptSourceCode)
         {
@@ -21,7 +21,7 @@ namespace IncrementalGeneratorSamples.Test
         public string OutptSourceCode { get; }
     }
 
-    internal class SimplestPractical : TestData
+    public class SimplestPractical : TestData
     {
         public SimplestPractical()
             : base(@"
@@ -38,7 +38,7 @@ namespace MyNamespace
         { }
     }
 
-    internal class WithOneProperty : TestData
+    public class WithOneProperty : TestData
     {
         public WithOneProperty()
             : base(@"
@@ -61,7 +61,7 @@ namespace MyNamespace
 
 
 
-    internal class WithMulitipeProperties : TestData
+    public class WithMulitipeProperties : TestData
     {
         public WithMulitipeProperties()
             : base(@"
@@ -87,7 +87,7 @@ namespace MyNamespace
         { }
     }
 
-    internal class WithXmlDescripions : TestData
+    public class WithXmlDescripions : TestData
     {
         public WithXmlDescripions()
            : base(@"
@@ -106,18 +106,62 @@ namespace MyNamespace
 }",
                   new("MyClass",
                         "MyNamespace",
-                        "\r\n<member name: TestData : base(\"\"T:MyNamespace.MyClass\"\">\r\n    <summary>\r\n    This is MyClass\r\n    </summary>\r\n</member>\r\n",
+                        @"
+<member name=""T:MyNamespace.MyClass"">
+    <summary>
+    This is MyClass
+    </summary>
+</member>",
                         Enumerable.Empty<AttributeValue>(),
                         new List<InitialPropertyModel>
                         { new("PropertyOne",
-                                "\r\n<member name: TestData : base(\"\"P:MyNamespace.MyClass.PropertyOne\"\">\r\n    <summary>\r\n    This is the first property\r\n    </summary>\r\n</member>",
+                                @"
+<member name=""P:MyNamespace.MyClass.PropertyOne"">
+    <summary>
+    This is the first property
+    </summary>
+</member>",
                                 "string?",
                                 Enumerable.Empty<AttributeValue>())}),
                   "")
         { }
     }
 
-    internal class WithAttributeNamedValues : TestData
+    public class WithAliasAttributes : TestData
+    {
+        public WithAliasAttributes()
+            : base(@"
+using IncrementalGeneratorSamples.Runtime;
+namespace MyNamespace
+{
+    [Alias(""command-alias"")]
+    public class MyClass
+    {
+       [Alias(""--p"")]
+       [Alias(""-prop1"")]
+       public string? PropertyOne{ get; set; }
+    }
+}",
+                   new("MyClass",
+                        "MyNamespace",
+                        "",
+                        new List<AttributeValue>
+                        {
+                            new("AliasAttribute","Alias","string","command-alias"),
+                        },
+                        new List<InitialPropertyModel>
+                        { new("PropertyOne","","string?",new List<AttributeValue>
+                            {
+                                new("AliasAttribute","Alias","string","--p"),
+                                new("AliasAttribute","Alias","string","-prop1"),
+                            })
+                        }),
+                   "")
+        { }
+    }
+
+
+    public class WithAttributeNamedValues : TestData
     {
         public WithAttributeNamedValues()
            : base(@"
@@ -155,8 +199,7 @@ namespace MyNamespace
         { }
     }
 
-
-    internal class WithAttributeConstructorValues : TestData
+    public class WithAttributeConstructorValues : TestData
     {
         public WithAttributeConstructorValues()
             : base(@"
@@ -201,7 +244,7 @@ namespace MyNamespace
     }
 
 
-    internal class WithAttributeNestedNamedValues : TestData
+    public class WithAttributeNestedNamedValues : TestData
     {
         public WithAttributeNestedNamedValues()
             : base( @"
@@ -235,7 +278,7 @@ namespace MyNamespace
 
 
 
-    internal class WithAttributeNestedConstructorValues : TestData
+    public class WithAttributeNestedConstructorValues : TestData
     {
         public WithAttributeNestedConstructorValues()
             : base(@"

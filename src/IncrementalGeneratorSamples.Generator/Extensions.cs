@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace IncrementalGeneratorSamples
 {
-    internal static class Helpers
+    public static class Helpers
     {
         public static string AsPublicSymbol(this string val)
            => char.IsUpper(val[0])

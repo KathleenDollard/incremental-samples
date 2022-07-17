@@ -9,16 +9,20 @@ namespace IncrementalGeneratorSamples.InternalModels
         private List<CommandModel> commands;
         public CommandModel(string name,
                             string originalName,
-                            string publicSymbolName,
-                            string privateSymbolName,
+                            string symbolName,
+                            string localSymbolName,
+                            IEnumerable<string> aliases,
                             string description,
+                            string nspace,
                             IEnumerable<OptionModel> options)
-        :base(name, originalName,publicSymbolName,privateSymbolName,description)
+        : base(name, originalName, symbolName, localSymbolName, aliases, description)
         {
             commands = new List<CommandModel>();
             Options = options;
+            Namespace = nspace;
         }
 
+        public string Namespace { get; }
         public IEnumerable<OptionModel> Options { get; }
 
         public override bool Equals(object obj)
@@ -27,7 +31,7 @@ namespace IncrementalGeneratorSamples.InternalModels
         }
 
         public bool Equals(InitialClassModel other)
-        {           // REVIEW: Does this box individual elements? Do we care if things are strings?
+        {   // REVIEW: Does this box individual elements? Do we care if things are strings?
             return StructuralComparisons.StructuralEqualityComparer.Equals(this, other);
         }
 

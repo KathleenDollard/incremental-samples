@@ -8,21 +8,24 @@ namespace IncrementalGeneratorSamples.InternalModels
     {
         public ModelCommon(string name,
                            string originalName,
-                           string publicSymbolName,
-                           string privateSymbolName,
+                           string symbolName,
+                           string localSymbolName,
+                           IEnumerable<string> aliases,
                            string description)
         {
             Name = name;
             OriginalName = originalName;
-            PublicSymbolName = publicSymbolName;
-            PrivateSymbolName = privateSymbolName;
+            SymbolName = symbolName;
+            LocalSymbolName = localSymbolName;
+            Aliases = aliases;
             Description = description;
         }
 
         public string Name { get; }
         public string OriginalName { get; }
-        public string PublicSymbolName { get; }
-        public string PrivateSymbolName { get; }
+        public string SymbolName { get; }
+        public string LocalSymbolName { get; }
+        public IEnumerable<string> Aliases { get; }
         public string Description { get; }
     }
 }

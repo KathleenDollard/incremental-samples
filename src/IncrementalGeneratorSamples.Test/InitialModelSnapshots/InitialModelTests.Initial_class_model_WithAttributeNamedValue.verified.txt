@@ -10,13 +10,13 @@
           AttributeName: NamedValueAttribute,
           ValueName: NamedInt,
           ValueType: int,
-          value: 43
+          Value: 43
         },
         {
           AttributeName: NamedValueAttribute,
           ValueName: NamedStrings,
           ValueType: string[],
-          value: [
+          Value: [
             D
           ]
         }
@@ -30,13 +30,13 @@
       AttributeName: NamedValueAttribute,
       ValueName: NamedInt,
       ValueType: int,
-      value: 42
+      Value: 42
     },
     {
       AttributeName: NamedValueAttribute,
       ValueName: NamedStrings,
       ValueType: string[],
-      value: [
+      Value: [
         A,
         B,
         C

@@ -15,12 +15,12 @@ namespace IncrementalGeneratorSamples
             AttributeName = attributeName;
             ValueName = valueName;
             ValueType = valueType;
-            this.value = value;
+            this.Value = value;
         }
 
         public string AttributeName { get;  }
         public string ValueName { get;  }
         public string ValueType { get;  }
-        public object value { get;  }
+        public object Value { get;  }
     }
 }

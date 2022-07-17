@@ -7,8 +7,9 @@ using System.Reflection;
 
 namespace IncrementalGeneratorSamples.Test
 {
-    public class TestHelpers
+    public static class TestHelpers
     {
+        public static CancellationToken CancellationTokenForTesting => new CancellationTokenSource().Token;
 
         public static Compilation GetInputCompilation<TGenerator>(OutputKind outputKind, params string[] code)
         {
@@ -59,5 +60,27 @@ namespace IncrementalGeneratorSamples.Test
             => diagnostics.Where(
                     x => x.Severity == DiagnosticSeverity.Error ||
                          x.Severity == DiagnosticSeverity.Warning);
+
+        public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
+            GetTransformInfo(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
+        {
+            var cancellationToken = new CancellationTokenSource().Token;
+            var compilation = TestHelpers.GetInputCompilation<Generator>(
+                    OutputKind.DynamicallyLinkedLibrary, sourceCode);
+            var inputDiagnostics = compilation.GetDiagnostics();
+            if (!continueOnInputErrors && TestHelpers.ErrorAndWarnings(inputDiagnostics).Any())
+            { return (null, null, null, cancellationToken, inputDiagnostics); }
+            var tree = compilation.SyntaxTrees.Single();
+            var matchQuery = tree.GetRoot()
+                .DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
+            if (filter is not null)
+            { matchQuery = matchQuery.Where(x => filter(x)); }
+            var matches = matchQuery.ToList();
+            Assert.Single(matches);
+            var syntaxNode = matches.Single();
+            var semanticModel = compilation.GetSemanticModel(tree);
+            return (syntaxNode, semanticModel.GetDeclaredSymbol(syntaxNode), semanticModel, cancellationToken, inputDiagnostics);
+        }
     }
 }

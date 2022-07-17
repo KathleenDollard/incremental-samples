@@ -15,13 +15,13 @@
       AttributeName: CtorValueAttribute,
       ValueName: positionalString,
       ValueType: string,
-      value: Okay
+      Value: Okay
     },
     {
       AttributeName: CtorValueAttribute,
       ValueName: objs,
       ValueType: object[],
-      value: [
+      Value: [
         1,
         3,
         5,
