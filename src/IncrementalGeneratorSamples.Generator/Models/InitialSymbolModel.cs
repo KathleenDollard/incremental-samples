@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace IncrementalGeneratorSamples.InternalModels
 {
@@ -15,28 +13,27 @@ namespace IncrementalGeneratorSamples.InternalModels
             XmlComments = xmlComments;
             Attributes = attributes;
         }
-        public string Name { get; set; }
-        public string XmlComments { get; set; }
-        public IEnumerable<AttributeValue> Attributes { get; set; }
+        public string Name { get;  }
+        public string XmlComments { get;  }
+        public IEnumerable<AttributeValue> Attributes { get;  }
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as InitialSymbolModel);
-        }
+            => Equals(obj as InitialSymbolModel);
 
-        public bool Equals(InitialSymbolModel other)
-        {           // REVIEW: Does this box individual elements? Do we care if things are strings?
-            return StructuralComparisons.StructuralEqualityComparer.Equals(this, other);
-            //return obj is InitialSymbolModel model &&
-            //       Name == model.Name &&
-            //       XmlComments == model.XmlComments &&
-            //       Attributes.SequenceEqual(model.Attributes);           
-        }
+        public bool Equals(InitialSymbolModel other) 
+            => !(other is null) &&
+                   Name == other.Name &&
+                   XmlComments == other.XmlComments &&
+                   // Is this default a value equality
+                   EqualityComparer<IEnumerable<AttributeValue>>.Default.Equals(Attributes, other.Attributes);
 
         public override int GetHashCode()
         {
-            // REVIEW: Does this box individual elements? Do we care if things are strings?
-            return StructuralComparisons.StructuralEqualityComparer.GetHashCode(this);
+            int hashCode = 1546976210;
+            hashCode = hashCode * -1521134295 + (Name, XmlComments).GetHashCode();
+            // Does this default correspond to a value equality
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<AttributeValue>>.Default.GetHashCode(Attributes);
+            return hashCode;
         }
     }
 }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using IncrementalGeneratorSamples;
 using IncrementalGeneratorSamples.InternalModels;
 using IncrementalGeneratorSamples.Test;
@@ -22,9 +15,9 @@ namespace Benchmarks
 
         public ExtractData()
         {
-            InputCode = new WithMulitipeProperties().InputSourceCode;
-            XmlDocs = new WithXmlDescripions().InitialClassModel.XmlComments;
-            var (_, symbol, _, cancellationToken, inputDiagnostics) = TestHelpers.GetTransformInfo(InputCode, x => x.Identifier.ToString() == "MyClass");
+            InputCode = new WithMultipleProperties().InputSourceCode;
+            XmlDocs = new WithXmlDescriptions().InitialClassModel.XmlComments;
+            var (_, symbol, _, cancellationToken, inputDiagnostics) = TestHelpers.GetTransformInfoForClass(InputCode, x => x.Identifier.ToString() == "MyClass");
             Symbol = symbol is null
                     ? throw new InvalidOperationException("symbol not found")
                     : symbol;

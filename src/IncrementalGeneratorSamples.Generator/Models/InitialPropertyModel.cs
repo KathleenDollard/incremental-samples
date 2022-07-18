@@ -18,23 +18,19 @@ namespace IncrementalGeneratorSamples.InternalModels
         public string Type { get; set; }
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as InitialPropertyModel);
-        }
+            => Equals(obj as InitialPropertyModel);
 
         public bool Equals(InitialPropertyModel other)
-        {           // REVIEW: Does this box individual elements? Do we care if things are strings?
-            return StructuralComparisons.StructuralEqualityComparer.Equals(this, other);
-            //return obj is InitialSymbolModel model &&
-            //       Name == model.Name &&
-            //       XmlComments == model.XmlComments &&
-            //       Attributes.SequenceEqual(model.Attributes);           
-        }
+            => !(other is null) &&
+                base.Equals(other) &&
+                Type == other.Type;
 
         public override int GetHashCode()
         {
-            // REVIEW: Does this box individual elements? Do we care if things are strings?
-            return StructuralComparisons.StructuralEqualityComparer.GetHashCode(this);
+            int hashCode = 1522494069;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type);
+            return hashCode;
         }
     }
 }

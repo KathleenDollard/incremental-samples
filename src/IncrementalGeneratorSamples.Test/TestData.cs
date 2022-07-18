@@ -1,47 +1,45 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IncrementalGeneratorSamples.Test
 {
     public class TestData
     {
-        protected TestData(string inputSourceCode, InitialClassModel initialClassModel, string outptSourceCode)
+        protected TestData(string inputSourceCode, InitialClassModel initialClassModel, CommandModel commandModel, string outputSourceCode)
         {
             InputSourceCode = inputSourceCode;
             InitialClassModel = initialClassModel;
-            OutptSourceCode = outptSourceCode;
+            CommandModel = commandModel;
+            OutputSourceCode = outputSourceCode;
         }
 
         public string InputSourceCode { get; }
         public InitialClassModel InitialClassModel { get; }
-        public string OutptSourceCode { get; }
+        public CommandModel CommandModel { get; }
+        public string OutputSourceCode { get; }
     }
 
     public class SimplestPractical : TestData
     {
         public SimplestPractical()
-            : base(@"
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     public class MyClass{}
 }",
-                   new("MyClass",
-                       "MyNamespace",
+                   initialClassModel: new("MyClass",
                        "",
                        Enumerable.Empty<AttributeValue>(),
+                       "MyNamespace",
                        Enumerable.Empty<InitialPropertyModel>()),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
     public class WithOneProperty : TestData
     {
         public WithOneProperty()
-            : base(@"
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     public class MyClass
@@ -49,22 +47,23 @@ namespace MyNamespace
         public string? PropertyOne{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         Enumerable.Empty<AttributeValue>(),
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",Enumerable.Empty<AttributeValue>())}),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
 
 
-    public class WithMulitipeProperties : TestData
+    public class WithMultipleProperties : TestData
     {
-        public WithMulitipeProperties()
-            : base(@"
+        public WithMultipleProperties()
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     public class MyClass
@@ -74,23 +73,24 @@ namespace MyNamespace
         public FileInfo? PropertyThree{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         Enumerable.Empty<AttributeValue>(),
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",Enumerable.Empty<AttributeValue>()),
                                 new("PropertyTwo","","int",Enumerable.Empty<AttributeValue>()),
                                 new("PropertyThree","","System.IO.FileInfo",Enumerable.Empty<AttributeValue>()),
                         }),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
-    public class WithXmlDescripions : TestData
+    public class WithXmlDescriptions : TestData
     {
-        public WithXmlDescripions()
-           : base(@"
+        public WithXmlDescriptions()
+           : base(inputSourceCode: @"
 namespace MyNamespace
 {
     /// <summary>
@@ -104,8 +104,7 @@ namespace MyNamespace
            public string? PropertyOne{ get; set; }
     }
 }",
-                  new("MyClass",
-                        "MyNamespace",
+                  initialClassModel: new("MyClass",
                         @"
 <member name=""T:MyNamespace.MyClass"">
     <summary>
@@ -113,6 +112,7 @@ namespace MyNamespace
     </summary>
 </member>",
                         Enumerable.Empty<AttributeValue>(),
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne",
                                 @"
@@ -123,14 +123,15 @@ namespace MyNamespace
 </member>",
                                 "string?",
                                 Enumerable.Empty<AttributeValue>())}),
-                  "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
     public class WithAliasAttributes : TestData
     {
         public WithAliasAttributes()
-            : base(@"
+            : base(inputSourceCode: @"
 using IncrementalGeneratorSamples.Runtime;
 namespace MyNamespace
 {
@@ -142,13 +143,13 @@ namespace MyNamespace
        public string? PropertyOne{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         new List<AttributeValue>
                         {
                             new("AliasAttribute","Alias","string","command-alias"),
                         },
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",new List<AttributeValue>
                             {
@@ -156,7 +157,8 @@ namespace MyNamespace
                                 new("AliasAttribute","Alias","string","-prop1"),
                             })
                         }),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
@@ -164,7 +166,7 @@ namespace MyNamespace
     public class WithAttributeNamedValues : TestData
     {
         public WithAttributeNamedValues()
-           : base(@"
+           : base(inputSourceCode: @"
 namespace MyNamespace
 {
     sealed class NamedValueAttribute : Attribute
@@ -180,14 +182,14 @@ namespace MyNamespace
         public string? PropertyOne{ get; set; }
     }
 }",
-                  new("MyClass",
-                        "MyNamespace",
+                  initialClassModel: new("MyClass",
                         "",
                         new List<AttributeValue>
                         {
                             new("NamedValueAttribute","NamedInt","int",42),
                             new("NamedValueAttribute","NamedStrings","string[]",new string[]{ "A","B","C"})
                         },
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",new List<AttributeValue>
                             {
@@ -195,14 +197,15 @@ namespace MyNamespace
                                 new("NamedValueAttribute","NamedStrings","string[]",new string[]{ "D"})
                             })
                         }),
-                  "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
     public class WithAttributeConstructorValues : TestData
     {
         public WithAttributeConstructorValues()
-            : base(@"
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     sealed class CtorValueAttribute : Attribute
@@ -224,14 +227,14 @@ namespace MyNamespace
        public string? PropertyOne{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         new List<AttributeValue>
                         {
                             new("CtorValueAttribute","positionalString","string","Okay"),
                             new("CtorValueAttribute","ints","int[]",new int[]{ 1,3,5,7})
                         },
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",new List<AttributeValue>
                             {
@@ -239,7 +242,8 @@ namespace MyNamespace
                                 new("CtorValueAttribute","ints","int[]",new int[]{ 11,13})
                             })
                         }),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
@@ -247,7 +251,7 @@ namespace MyNamespace
     public class WithAttributeNestedNamedValues : TestData
     {
         public WithAttributeNestedNamedValues()
-            : base( @"
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     sealed class NamedValueAttribute : Attribute
@@ -262,17 +266,18 @@ namespace MyNamespace
         public string? PropertyOne{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         new List<AttributeValue>
                         {
                             new("NamedValueAttribute","NamedInt","int",42),
                             new("NamedValueAttribute","NamedStrings","object[]",new object[]{ "A","B",new object[] { "C" } })
                         },
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",Enumerable.Empty<AttributeValue>()) }),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 
@@ -281,7 +286,7 @@ namespace MyNamespace
     public class WithAttributeNestedConstructorValues : TestData
     {
         public WithAttributeNestedConstructorValues()
-            : base(@"
+            : base(inputSourceCode: @"
 namespace MyNamespace
 {
     sealed class CtorValueAttribute : Attribute
@@ -302,17 +307,18 @@ namespace MyNamespace
        public string? PropertyOne{ get; set; }
     }
 }",
-                   new("MyClass",
-                        "MyNamespace",
+                   initialClassModel: new("MyClass",
                         "",
                         new List<AttributeValue>
                         {
                             new("CtorValueAttribute","positionalString","string","Okay"),
                             new("CtorValueAttribute","ints","object[]",new object[]{ 1,3,5,new object[] { 7 } })
                         },
+                        "MyNamespace",
                         new List<InitialPropertyModel>
                         { new("PropertyOne","","string?",Enumerable.Empty<AttributeValue>()) }),
-                   "")
+                   commandModel: null, 
+                   outputSourceCode: "")
         { }
     }
 }

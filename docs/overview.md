@@ -10,19 +10,18 @@ ms.topic: overview
 
 Source generators are run by the compiler to add C# or VB code to the compilation. Roslyn *incremental source generators* are defined as a series of steps called by the compiler which allows the compiler to shortcut if the results of any step in its cache is unchanged. Incremental generators are also granular and manage the cache independently for each item in a collection. The compiler can also cancel after each step. These features allow incremental generators to minimize the work performed and provide a pattern that is maintainable and testable.
 
-Source generators run during both design time builds and [[full]] builds. This allows them to extend user code with new code that adds classes, methods and properties that immediately affect the users experience via features like IntelliSense. It also means that generators run very often - each time a new design-time compilation is created.
-
+Source generators run during both design time builds and [[full]] builds. This allows them to extend user code with new code that adds classes, methods and properties that immediately affect the users experience via features like IntelliSense. It also means that generators run very often - each time a new design-time compilation is created. 
 Most programmers will not need to write source generators, but will take advantage of those written by others. If you do write a generator, follow the [Performance Guidelines]() and be [tested for performance]() because your generator can adversely affect the design time performance of editors such as Visual Studio. Source generators are new and we are evolving guidance on banned APIs, so feel free to reach out at [[@Jaredpa and @chsienki where?]] if you want to check the impact of a technique.
 
 > [!CAUTION]
-> We will disable generators during the design time build if they are slow or we analysis indicates that they do not follow guidelines.
+> We will disable generators during the design time build if they are slow or analysis indicates that they do not follow guidelines.
 
-This article assumes that you understand the basics of the [Roslyn compiler](), [syntax trees](), [compilations](), [compilation](), [cancellation tokens]() and the [difference between value and reference equality](). It will also help to have an understanding of functional techniques using delegates such as lambda expressions.
+Source generators are an advanced feature. This article assumes that you understand the basics of the [Roslyn compiler](), [syntax trees](), [compilations](), [compilation](), [cancellation tokens]() and the [difference between value and reference equality](). It will also help to have an understanding of functional techniques using delegates such as lambda expressions.
 
 ## How often generators run
 
 [[Review folks: Is this following correct, and does it over-share. Or shall we drop this and in line say they run "very often, up to running on every keystroke"]]
-Generators run when the editor determines they should be run. For Visual Studio, a cached compilation is used when the user is typing quickly. While you are typing quickly, the user does not need to see updated IntelliSense, analyzer, and generator results. Visual Studio has evolving rules on when it updates the design compilation and does it as often as possible without hurting performance.
+Generators run when the editor determines they should be run,which could be as often as every keystroke. But Visual Studio is smart and keeps a cached compilation to use when the user is typing quickly and does not need to see updated compile time features like IntelliSense, analyzer, and generator results. Visual Studio has evolving rules on when it updates the design compilation and does it as often as possible without hurting performance.
 
 ## How Roslyn generators work
 

@@ -8,6 +8,13 @@ ms.topic: overview
 ---
 # Tips for creating generators
 
+## Troubleshooting
+
+### One or more steps of the generator do not run
+
+The steps of the pipeline are optimized, and if values are not used, they are not created. Check that output depends on the missing steps.
+
+
 ## Code called in the generator pipeline must be pure
 
 What is purity

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -28,40 +29,41 @@ namespace IncrementalGeneratorSamples
                             val.Skip(1).Select(c => char.IsUpper(c) ? $"-{char.ToLower(c)}" : c.ToString()));
         }
 
-        public static IEnumerable<AttributeValue>
-            AttributenamesAndValues(this ISymbol symbol)
-        {
-            var attributes = symbol.GetAttributes();
-            var list = new List<AttributeValue>();
-            foreach (var attribute in attributes)
+            public static IEnumerable<AttributeValue> AttributeNamesAndValues(this ISymbol symbol)
             {
-                var attributeName = attribute.AttributeClass.Name.ToString();
-                foreach (var pair in attribute.NamedArguments)
+                var attributes = symbol.GetAttributes();
+                var list = new List<AttributeValue>();
+                foreach (var attribute in attributes)
                 {
-                    var value = ValuesFromTypedConstant(pair.Value);
-                    list.Add(new AttributeValue(attributeName, pair.Key, pair.Value.Type.ToString(), value));
-
-                }
-                if (!(attribute.AttributeConstructor is null))
-                {
-                    var parameters = attribute.AttributeConstructor.Parameters;
-                    var args = attribute.ConstructorArguments;
-                    for (int i = 0; i < parameters.Length; i++)
+                    var attributeName = attribute.AttributeClass.Name.ToString();
+                    foreach (var pair in attribute.NamedArguments)
                     {
-                        if (parameters.Length >= i && args.Length >= i)
+                        var value = ValuesFromTypedConstant(pair.Value);
+                        list.Add(new AttributeValue(attributeName, pair.Key, pair.Value.Type.ToString(), value));
+
+                    }
+                    if (!(attribute.AttributeConstructor is null))
+                    {
+                        var parameters = attribute.AttributeConstructor.Parameters;
+                        var args = attribute.ConstructorArguments;
+                        for (int i = 0; i < parameters.Length; i++)
                         {
-                            var value = ValuesFromTypedConstant(args[i]);
-                            list.Add(new AttributeValue(attributeName, parameters[i].Name, parameters[i].Type.ToString(), value));
+                            if (parameters.Length >= i && args.Length >= i)
+                            {
+                                var value = ValuesFromTypedConstant(args[i]);
+                                list.Add(new AttributeValue(attributeName, parameters[i].Name, parameters[i].Type.ToString(), value));
+                            }
                         }
                     }
                 }
+                return list;
             }
-            return list;
-        }
 
         private static object ValuesFromTypedConstant(TypedConstant val, int recursionDepth = 1)
         {
             recursionDepth += 1;
+            if (recursionDepth > 10)
+            { throw new InvalidOperationException("Runaway recursion suspected"); }
             return val.Kind == TypedConstantKind.Array
                                             ? ValuesFromTypedConstantArray(val.Values, recursionDepth)
                                             : val.Value;

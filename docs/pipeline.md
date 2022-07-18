@@ -14,13 +14,14 @@ The Roslyn incremental source generator uses a pipeline. A pipeline is a set of 
 
 LINQ is an example of this type of pipeline where the container is an `IEnumerable<T1>` collection. The pipeline is created as a series of delegates passed to methods like `Where`. This LINQ pipeline is executed at a later time, and possibly executed multiple times, by iterating with `foreach` or calling a method like `ToList`. As you call methods of the LINQ pipeline like `Select` or `OfType`, a new `IEnumerable<T2>` container is returned. `T1` and `T2` may be of the same or different types.
 
-There is a great deal of theoretical work around these types of containers within pipelines. You can explore this by searching for terms like "lambda calculus" or explore functional programming books, but you will not need a deeper understanding to create Roslyn incremental generators. You will only need to understand a few things: 
+There is a great deal of theoretical work around these types of containers within pipelines. You can explore this by searching for terms like "lambda calculus" or explore functional programming books, but you will not need a deeper understanding to create Roslyn incremental generators. You will only need to understand a few things:
 
 * The pipeline contains functions - delegates or lambda expressions.
 * The pipeline does not execute until requested.
 * The pipeline operates on a generic container.
 * The pipeline does not need to know the contents of the containers, although the functions that make up the pipeline do.
 * The pipeline can intervene after any step to provide features like cancellation and caching.
+* The pipeline will not do unnecessary work - if a value is not used, it's value is not calculated.
 
 [[ @chsienki The spec refers to IValueProvider<T>, but I cannot find this interface. Is this now just a logical grouping of the ..Value.. and ..Values.. providers? (That is how I wrote this article) ]]
 
@@ -90,13 +91,25 @@ The pipeline methods for incremental generators are extension methods on one or 
 | WithTrackingName | `..Values..`, `string`                     | `..Values..` |                                                |
 | WithTrackingName | `..Value..`, `string`                      | `..Value..`  |                                                |
 
+You can find more details on these methods in the [Incremental Generators spec](https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.md).
 
-You can find out more about how these methods work in the [Incremental Generators spec](https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.md).
+* Use `Where` to abandon data when you understand it is not of value. This might if the transform of `SyntaxValueProvider.CreateSyntax` or `SyntaxValueProvider.ForAttributedSyntaxProvider` returns null for syntax nodes that require no further generation.
+  
+* Use `Select` to transform from the initial domain model to a domain model that is friendlier for code output. The initial domain model should be as simple as possible to capture details from the compilation to allow rapid checking of the cache. This is often in the language of source code, rather than in the domain language of your problem, and outputting non-trivial code is much easier if the model is in the final domain and pre-calculates common values.
+
+* Use `SelectMany` to split up a single domain model into multiple domain models. For example, use this if `SyntaxValueProvider.ForAttributedSyntaxProvider` returns attributed classes, and you want to output a separate file, or do other work, based on each property or method.
+
+* Use `Collect` to summarize, which is the reverse of `SelectMany`. For example, use this if `SyntaxValueProvider.ForAttributedSyntaxProvider` returns attributed properties or methods, and you want to output a single file, or do other work, based on the group.
+
+* Adding a consistent value to each of a set of domain models using `Combine` and `Select` [[ continue example ]]
+
+* Providing *join* behavior using `Combine` and `Select` [[ warning and then continue example ]]
+
+You can see examples of some these in the [Creating an incremental source generator section](creating-source-generator/creating-a-source-generator.md).
 
 ## Output
 
 There are three methods to generate code: `RegisterSourceOutput`, `RegisterImplementationSourceOutput`, and `RegisterPostInitializationOutput`.
-
 The pipeline ends when you generate code output using the `RegisterSourceOutput` method. There are two overloads of this method both of which take two parameters. One takes an `IncrementalValuesProvider` and a delegate that will create the output. The generator iterates over the `IncrementalValuesProvider` and calls the delegate for each member, passing a `SourceProductionContext` and the current member of the collection. Another overload of `RegisterSourceOutput` takes an `IncrementalValueProvider` and a delegate and supports generating code from for a single value.
 
 The delegate passed to `RegisterSourceOutput` takes a `SourceProductionContext` and a single data model. Code in the delegate calls the `AddSource` method to add source code to the new compilation. This method has two parameters: the *hintname* and the new source code as a string. The *hintname* is the output filename.

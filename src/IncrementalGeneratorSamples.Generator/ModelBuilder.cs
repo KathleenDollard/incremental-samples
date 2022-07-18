@@ -1,6 +1,5 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,17 +18,17 @@ namespace IncrementalGeneratorSamples
             var properties = new List<InitialPropertyModel>();
             foreach (var property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
             {
-                // since we do not know how big this list is, so we will check cancellation token
+                // since we do not know how big this list is, check cancellation token
                 cancellationToken.ThrowIfCancellationRequested();
                 properties.Add(new InitialPropertyModel(property.Name,
                                                      property.GetDocumentationCommentXml(),
                                                      property.Type.ToString(),
-                                                     property.AttributenamesAndValues()));
+                                                     property.AttributeNamesAndValues()));
             }
             return new InitialClassModel(typeSymbol.Name,
-                                         typeSymbol.ContainingNamespace.Name,
                                          typeSymbol.GetDocumentationCommentXml(),
-                                         typeSymbol.AttributenamesAndValues(),
+                                         typeSymbol.AttributeNamesAndValues(),
+                                         typeSymbol.ContainingNamespace.Name,
                                          properties);
         }
 
