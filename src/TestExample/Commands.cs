@@ -21,7 +21,10 @@ public partial class ReadFile
     public int Execute()
     {
         if (File is null)
-        { return 1; }
+        {
+            Console.WriteLine("No file name was specified.");
+            return 1;
+        }
         List<string> lines = System.IO.File.ReadLines(File.FullName).ToList();
         foreach (string line in lines)
         {

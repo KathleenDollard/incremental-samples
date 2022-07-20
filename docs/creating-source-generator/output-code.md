@@ -8,4 +8,5 @@ Break complex code into methods that return fragment of the code you want to cre
 
 ## Example
 
-[[COntinue the example]]
+This example builds on the design of the [Further transformations article](further-transformations.md#example). You can see how this code is used in [Putting it all together](putting-it-all-together.md#example).
+

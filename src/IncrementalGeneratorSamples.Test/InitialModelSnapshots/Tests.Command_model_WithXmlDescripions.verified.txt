@@ -11,10 +11,10 @@
       Description: This is the first property
     }
   ],
-  Name: my-class,
-  OriginalName: MyClass,
-  SymbolName: MyClass,
-  LocalSymbolName: myClass,
+  Name: with-xml-descriptions,
+  OriginalName: WithXmlDescriptions,
+  SymbolName: WithXmlDescriptions,
+  LocalSymbolName: withXmlDescriptions,
   Aliases: [],
-  Description: This is MyClass
+  Description: This class is named WithXmlDescriptions
 }

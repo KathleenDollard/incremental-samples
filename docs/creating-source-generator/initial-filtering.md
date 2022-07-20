@@ -51,7 +51,9 @@ When required multiple syntax providers may return different domain models which
 
 ## Example
 
-This example extracts data in the language of source code - it has a `ClassModel` and a `PropertyModel`. A later `Select` will transform this into the language of the domain - `CommandModel` and `OptionModel`. This decision was made to delay work that was unnecessary for the value equality comparison with the cached value. In particular, it extracts the description from the XML documentation. Retrieving the XML documentation from `ISymbol` is not slow. Loading it as using `XDocument.Parse` to extract the description is slow. This step takes more time than all of the simple extraction from source code, and has significantly more allocations. You'll see both of these methods as you walk through the example:
+This example builds on the design of the [Designing input article](design-input-data.md#example). You can see how this code is used in [Putting it all together](putting-it-all-together.md#example).
+
+This extracts data in the language of source code - it has a `ClassModel` and a `PropertyModel`. A later `Select` will transform this into the language of the domain - `CommandModel` and `OptionModel`. This decision was made to delay work that was unnecessary for the value equality comparison with the cached value. In particular, it extracts the description from the XML documentation. Retrieving the XML documentation from `ISymbol` is not slow. Loading it as using `XDocument.Parse` to extract the description is slow. This step takes more time than all of the simple extraction from source code, and has significantly more allocations. You'll see both of these methods as you walk through the example:
 
 |                 Method |     Mean |     Error |    StdDev |  Gen 0 |  Gen 1 | Allocated |
 |----------------------- |---------:|----------:|----------:|-------:|-------:|----------:|
@@ -253,7 +255,7 @@ public class AttributeValue : IEquatable<AttributeValue>
 }
 ```
 
-`Name` is the name of the attribute class. `ValueName` and `ValueType` are the name and type of the property or the constructor parameter. The extension method to gather attribute information is:
+`Name` is the name of the attribute class. `ValueName` and `ValueType` are the name and type of the property or the constructor parameter. The `AttributeNamesAndValues` method considers both named attribute properties and constructor parameters, and assumes that all value may be interesting to later steps:
 
 ```csharp
     public static IEnumerable<AttributeValue> AttributeNamesAndValues(this ISymbol symbol)
@@ -286,8 +288,6 @@ public class AttributeValue : IEquatable<AttributeValue>
         return list;
     }
 ```
-
-The `AttributeNamesAndValues` method considers both named attribute properties and constructor parameters.
 
 The values passed to attributes must be constants, arrays or types. This is represented in the semantic model as a `TypedConstant`, but again, if we include a `TypedConstant` in the model returned by the transform method, it will break value equality, therefore break caching, and result in full generation on every design time compilation. Instead we evaluate the typed constant and put only return the values. This is tricky because it is legal to have nested arrays if the type is an `array` of `object`. This code solves this problem with recursion, and a depth check for runaway recursion as it is difficult to find in tests:
 
@@ -369,24 +369,19 @@ A subdirectory is specified for the test output so that these text files are not
 `TestData` is a base class which each scenario derives from. This type is:
 
 ```csharp
-public class TestData
-{
-    protected TestData(string inputSourceCode, InitialClassModel initialClassModel, CommandModel commandModel, string outputSourceCode)
+    public class TestData
     {
-        InputSourceCode = inputSourceCode;
-        InitialClassModel = initialClassModel;
-        CommandModel = commandModel;
-        OutputSourceCode = outputSourceCode;
-    }
+        protected TestData(string inputSourceCode)
+        {
+            InputSourceCode = inputSourceCode;
+        }
 
-    public string InputSourceCode { get; }
-    public InitialClassModel InitialClassModel { get; }
-    public CommandModel CommandModel { get; }
-    public string OutputSourceCode { get; }
-}
+        public string InputSourceCode { get; }
+        // Additional stuff for testing other pipeline steps
+     }
 ```
 
-An example of a scenario class;
+An example of a scenario class that only provides the initial source code:
 
 ```csharp
 public class SimplestPractical : TestData
@@ -396,9 +391,7 @@ public class SimplestPractical : TestData
 namespace MyNamespace
 {
 public class MyClass{}
-}",
-                // the other arguments are created in later examples
-        )
+}")
     { }
 }
 ```

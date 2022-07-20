@@ -1,7 +1,6 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace IncrementalGeneratorSamples
@@ -32,18 +31,19 @@ namespace IncrementalGeneratorSamples
                                          properties);
         }
 
-        public static CommandModel GetModel(InitialClassModel classModel,
+        public static CommandModel GetCommandModel(InitialClassModel classModel,
                                             CancellationToken cancellationToken)
         {
+            // null is not expected, but may happen with invalid code
             if (classModel is null) { return null; }
 
+            var aliases = Helpers.GetAttributeValues(classModel.Attributes, "AliasAttribute");
             var options = new List<OptionModel>();
-            var aliases = GetAliases(classModel.Attributes);
             foreach (var property in classModel.Properties)
             {
-                // since we do not know how big this list is, so we will check cancellation token
+                // since we do not know how big this list is, check cancellation token
                 cancellationToken.ThrowIfCancellationRequested();
-                var optionAliases = GetAliases(property.Attributes);
+                var optionAliases = Helpers.GetAttributeValues(property.Attributes, "AliasAttribute");
                 options.Add(new OptionModel(
                     $"--{property.Name.AsKebabCase()}",
                     property.Name,
@@ -64,15 +64,6 @@ namespace IncrementalGeneratorSamples
                     options: options);
         }
 
-        private static IEnumerable<string> GetAliases(IEnumerable<AttributeValue> attributes)
-        {
-            var aliasAttributes = attributes.Where(x => x.AttributeName == "AliasAttribute");
-            if (!aliasAttributes.Any())
-            { return Enumerable.Empty<string>(); }
-            var aliases = new List<string>();
-            foreach (var attribute in aliasAttributes)
-            { aliases.Add(attribute.Value.ToString()); }
-            return aliases;
-        }
+      
     }
 }

@@ -1,33 +1,35 @@
+﻿
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
 
-namespace TestExample;
+namespace MyNamespace;
 
-public partial class ReadFile
+public partial class WithXmlDescriptions
 {
     internal class CommandHandler : CommandHandlerBase
     {
         // Manage singleton instance
-        public static ReadFile.CommandHandler Instance { get; } = new ReadFile.CommandHandler();
+        public static WithXmlDescriptions.CommandHandler Instance { get; } = new WithXmlDescriptions.CommandHandler();
 
         // Create System.CommandLine options
-        private Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+        private Option<string?> propertyOneOption = new Option<string?>("--property-one", "This is the first property");
 
         // Base constructor creates System.CommandLine and optins are added here
         private CommandHandler()
-            : base("read-file", "")
+            : base("with-xml-descriptions", "This class is named WithXmlDescriptions")
         {
-            Command.AddOption(fileOption);
+            
+            Command.AddOption(propertyOneOption);
         }
 
         // The code invoked when the user runs the command
         protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
+            var command = new WithXmlDescriptions(GetValueForSymbol(propertyOneOption, commandResult));
             return command.Execute();
         }
     }

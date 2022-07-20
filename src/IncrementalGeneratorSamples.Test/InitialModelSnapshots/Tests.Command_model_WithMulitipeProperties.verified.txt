@@ -29,10 +29,10 @@
       Description: 
     }
   ],
-  Name: my-class,
-  OriginalName: MyClass,
-  SymbolName: MyClass,
-  LocalSymbolName: myClass,
+  Name: with-multiple-properties,
+  OriginalName: WithMultipleProperties,
+  SymbolName: WithMultipleProperties,
+  LocalSymbolName: withMultipleProperties,
   Aliases: [],
   Description: 
 }

@@ -1,4 +1,3 @@
-
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
@@ -9,37 +8,29 @@ namespace TestExample;
 
 public partial class AddLine
 {
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : CommandHandlerBase
     {
-        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
-        Option<string> lineOption = new Option<string>("--line", "Delay between lines, specified as milliseconds per character in a line.");
+        // Manage singleton instance
+        public static AddLine.CommandHandler Instance { get; } = new AddLine.CommandHandler();
 
-        public CommandHandler()
-            : base("add-line", "")
+        // Create System.CommandLine options
+        private Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+        private Option<string> lineOption = new Option<string>("--line", "Delay between lines, specified as milliseconds per character in a line.");
+
+        // Base constructor creates System.CommandLine and optins are added here
+        private CommandHandler()
+            : base("add-line", "Add a new line to a file.")
         {
-            SystemCommandLineCommand.AddOption(fileOption);
-            SystemCommandLineCommand.AddOption(lineOption);
+            Command.AddOption(fileOption);
+            Command.AddOption(lineOption);
         }
 
-        /// <summary>
-        /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.
-        /// </summary>
-        /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
-        public override int Invoke(InvocationContext invocationContext)
+        // The code invoked when the user runs the command
+        protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
             var command = new AddLine(GetValueForSymbol(fileOption, commandResult), GetValueForSymbol(lineOption, commandResult));
             return command.Execute();
-        }
-
-        /// <summary>
-        /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.
-        /// </summary>
-        /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
-        public override Task<int> InvokeAsync(InvocationContext invocationContext)
-        {
-            // Since this method is not implemented in the user source, we do not implement it here.
-            throw new NotImplementedException();
         }
     }
 }

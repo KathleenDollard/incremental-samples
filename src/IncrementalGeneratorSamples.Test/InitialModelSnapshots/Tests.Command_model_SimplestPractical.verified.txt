@@ -1,0 +1,10 @@
+﻿{
+  Namespace: MyNamespace,
+  Options: [],
+  Name: simplest-practical,
+  OriginalName: SimplestPractical,
+  SymbolName: SimplestPractical,
+  LocalSymbolName: simplestPractical,
+  Aliases: [],
+  Description: 
+}

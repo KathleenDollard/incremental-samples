@@ -20,7 +20,7 @@
       Attributes: []
     }
   ],
-  Name: MyClass,
+  Name: WithMultipleProperties,
   XmlComments: ,
   Attributes: []
 }

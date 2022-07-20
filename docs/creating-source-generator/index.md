@@ -1,10 +1,11 @@
 # Creating a source generator
 
-- [Design input data]()
-- [Initial filtering]()
-- [Supply further transformations (optional)]()
-- [Output code]()
-- [Unit testing individual steps]()
+- [Design output](design-output.md)
+- [Design input data](design-input-data.md)
+- [Initial filtering](initial-filtering.md)
+- [Supply further transformations (optional)](further-tranformations.md)
+- [Output code](output-code.md)
+- [Putting it all together](putting-it-all-together.md)
 - [Testing generation]()
 - [End to end testing]()
 - [Reporting diagnostics]()

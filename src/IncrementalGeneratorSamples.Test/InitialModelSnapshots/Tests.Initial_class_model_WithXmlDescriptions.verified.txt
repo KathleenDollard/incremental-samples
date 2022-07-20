@@ -5,7 +5,7 @@
       Type: string?,
       Name: PropertyOne,
       XmlComments:
-<member name="P:MyNamespace.MyClass.PropertyOne">
+<member name="P:MyNamespace.WithXmlDescriptions.PropertyOne">
     <summary>
     This is the first property
     </summary>
@@ -14,11 +14,11 @@
       Attributes: []
     }
   ],
-  Name: MyClass,
+  Name: WithXmlDescriptions,
   XmlComments:
-<member name="T:MyNamespace.MyClass">
+<member name="T:MyNamespace.WithXmlDescriptions">
     <summary>
-    This is MyClass
+    This class is named WithXmlDescriptions
     </summary>
 </member>
 ,

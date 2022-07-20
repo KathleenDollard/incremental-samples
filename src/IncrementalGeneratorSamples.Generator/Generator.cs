@@ -9,13 +9,16 @@ namespace IncrementalGeneratorSamples
     {
         public void Initialize(IncrementalGeneratorInitializationContext initContext)
         {
-            var commandModelValues = initContext.SyntaxProvider
+            var classModelValues = initContext.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
                     predicate: (_, _1) => true,
                     transform: GetModelFromAttribute);
 
-            var rootCommandValue = commandModelValues.Collect();
+            classModelValues = classModelValues.Where(classModel => !(classModel is null));
+
+            var commandModelValues = classModelValues.Select((classModel, cancellationToken) 
+                => ModelBuilder.GetCommandModel(classModel, cancellationToken));
 
             //initContext.RegisterPostInitializationOutput((postinitContext) =>
             //    postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));

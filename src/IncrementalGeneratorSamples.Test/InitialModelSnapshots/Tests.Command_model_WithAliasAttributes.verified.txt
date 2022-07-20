@@ -7,14 +7,19 @@
       OriginalName: PropertyOne,
       SymbolName: PropertyOne,
       LocalSymbolName: propertyOne,
-      Aliases: [],
+      Aliases: [
+        --p,
+        -prop1
+      ],
       Description: 
     }
   ],
-  Name: my-class,
-  OriginalName: MyClass,
-  SymbolName: MyClass,
-  LocalSymbolName: myClass,
-  Aliases: [],
+  Name: with-alias-attributes,
+  OriginalName: WithAliasAttributes,
+  SymbolName: WithAliasAttributes,
+  LocalSymbolName: withAliasAttributes,
+  Aliases: [
+    command-alias
+  ],
   Description: 
 }
