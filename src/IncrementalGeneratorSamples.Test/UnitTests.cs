@@ -3,7 +3,7 @@
 namespace IncrementalGeneratorSamples.Test
 {
     [UsesVerify]
-    public class Tests
+    public class UnitTests
     {
         private static T GetInputSource<T>(Type inputDataType, Func<TestData, T> getPart)
             where T : class?
@@ -27,12 +27,12 @@ namespace IncrementalGeneratorSamples.Test
         {
             var inputSource = GetInputSource(inputDataType, x => x.InputSourceCode);
             var (_, symbol, _, cancellationToken, inputDiagnostics) = TestHelpers.GetTransformInfoForClass(inputSource, x => true);
-            Assert.Empty(TestHelpers.ErrorAndWarnings(inputDiagnostics));
+            Assert.Empty(TestHelpers.WarningAndErrors(inputDiagnostics));
             Assert.NotNull(symbol);
 
             var classModel = ModelBuilder.GetInitialModel(symbol, cancellationToken);
 
-            return Verifier.Verify(classModel).UseDirectory("InitialModelSnapshots").UseTextForParameters(fileNamePart);
+            return Verifier.Verify(classModel).UseDirectory("Snapshots").UseTextForParameters(fileNamePart);
         }
 
 
@@ -50,7 +50,7 @@ namespace IncrementalGeneratorSamples.Test
 
             var commandModel = ModelBuilder.GetCommandModel(initialModel, TestHelpers.CancellationTokenForTesting);
 
-            return Verifier.Verify(commandModel).UseDirectory("InitialModelSnapshots").UseTextForParameters(fileNamePart);
+            return Verifier.Verify(commandModel).UseDirectory("Snapshots").UseTextForParameters(fileNamePart);
         }
 
 
@@ -61,7 +61,7 @@ namespace IncrementalGeneratorSamples.Test
 
             var outputCode = CodeOutput.ConsistentCli;
 
-            return Verifier.Verify(outputCode).UseDirectory("InitialModelSnapshots").UseTextForParameters("Cli");
+            return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters("Cli");
         }
 
 
@@ -75,7 +75,7 @@ namespace IncrementalGeneratorSamples.Test
 
             var outputCode = CodeOutput.PartialCli(commandModels, TestHelpers.CancellationTokenForTesting);
 
-            return Verifier.Verify(outputCode).UseDirectory("InitialModelSnapshots").UseTextForParameters(fileNamePart);
+            return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(fileNamePart);
         }
 
 
@@ -89,7 +89,7 @@ namespace IncrementalGeneratorSamples.Test
 
             var outputCode = CodeOutput.GenerateRootCommandCode(commandModels, TestHelpers.CancellationTokenForTesting);
 
-            return Verifier.Verify(outputCode).UseDirectory("InitialModelSnapshots").UseTextForParameters(fileNamePart);
+            return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(fileNamePart);
         }
 
         [Theory]
@@ -106,7 +106,7 @@ namespace IncrementalGeneratorSamples.Test
 
             var outputCode = CodeOutput.GenerateCommandCode(commandModel, TestHelpers.CancellationTokenForTesting);
 
-            return Verifier.Verify(outputCode).UseDirectory("InitialModelSnapshots").UseTextForParameters(fileNamePart);
+            return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(fileNamePart);
         }
     }
 }
