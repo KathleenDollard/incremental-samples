@@ -9,43 +9,51 @@ namespace IncrementalGeneratorSamples
     {
         public void Initialize(IncrementalGeneratorInitializationContext initContext)
         {
+            // Initial extraction - there may be multiple for some generators
             var classModelValues = initContext.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
                     predicate: (_, _1) => true,
                     transform: GetModelFromAttribute);
 
+            // Further transformations
             classModelValues = classModelValues.Where(classModel => !(classModel is null));
 
-            var commandModelValues = classModelValues.Select((classModel, cancellationToken) 
-                => ModelBuilder.GetCommandModel(classModel, cancellationToken));
+            var commandModelValues = classModelValues
+                .Select( ModelBuilder.GetCommandModel);
 
-            //initContext.RegisterPostInitializationOutput((postinitContext) =>
-            //    postinitContext.AddSource("Cli.g.cs", CodeOutput.AlwaysOnCli));
+            var rootCommandValue = commandModelValues
+                .Collect()
+                .Select(ModelBuilder.GetRootCommandModel);
 
-            //initContext.RegisterSourceOutput(
-            //   rootCommandValue,
-            //   (outputContext, modelData) =>
-            //           outputContext.AddSource("Cli.Partial.g.cs",
-            //                             CodeOutput.PartialCli(modelData, outputContext.CancellationToken)));
+            // Output code that does not depend on input and is added prior to compilation
+            initContext.RegisterPostInitializationOutput((postinitContext) =>
+                postinitContext.AddSource("Cli.g.cs", CodeOutput.ConsistentCli));
 
-            //initContext.RegisterSourceOutput(
-            //    commandModelValues,
-            //    (outputContext, modelData) =>
-            //            outputContext.AddSource(CodeOutput.FileName(modelData),
-            //                              CodeOutput.GenerateCommandCode(modelData, outputContext.CancellationToken)));
+            // Output code on einput could produce several outputs, and the reverse
+            initContext.RegisterSourceOutput(
+                rootCommandValue,
+                (outputContext, rootModel) =>
+                    outputContext.AddSource("Cli.Partial.g.cs",
+                            CodeOutput.PartialCli(rootModel, outputContext.CancellationToken)));
 
-            //initContext.RegisterSourceOutput(
-            //    rootCommandValue,
-            //    (outputContext, modelData) =>
-            //            outputContext.AddSource("Root.g.cs",
-            //                              CodeOutput.GenerateRootCommandCode(modelData, outputContext.CancellationToken)));
+            initContext.RegisterSourceOutput(
+                commandModelValues,
+                (outputContext, model) =>
+                        outputContext.AddSource(CodeOutput.FileName(model),
+                             CodeOutput.GenerateCommandCode(model, outputContext.CancellationToken)));
+
+            initContext.RegisterSourceOutput(
+                rootCommandValue,
+                (outputContext, rootModel) =>
+                        outputContext.AddSource("Root.g.cs",
+                            CodeOutput.GenerateRootCommandCode(rootModel, outputContext.CancellationToken)));
 
         }
 
         private static InitialClassModel GetModelFromAttribute(GeneratorAttributeSyntaxContext generatorContext,
                                       CancellationToken cancellationToken)
-         => ModelBuilder.GetInitialModel( generatorContext.TargetSymbol,  cancellationToken);
+         => ModelBuilder.GetInitialModel(generatorContext.TargetSymbol, cancellationToken);
 
 
     }

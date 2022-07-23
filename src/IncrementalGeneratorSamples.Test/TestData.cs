@@ -19,7 +19,6 @@ namespace IncrementalGeneratorSamples.Test
         public string InputSourceCode { get; }
         public InitialClassModel? InitialClassModel { get; }
         public CommandModel? CommandModel { get; }
-
     }
 
     public class SimplestPractical : TestData
@@ -125,7 +124,7 @@ namespace MyNamespace
     }
 
     [NamedValue(NamedInt = 42, NamedStrings = new string[] { ""A"", ""B"", ""C"" })]
-    public class MyClass
+    public class WithAttributeNamedValue
     {
         [NamedValue(NamedInt = 43, NamedStrings = new string[] { ""D"" })]
         public string? PropertyOne{ get; set; }
@@ -153,7 +152,7 @@ namespace MyNamespace
     }
 
     [CtorValue(""Okay"", new int[] { 1, 3, 5, 7 })]
-    public class MyClass
+    public class WithAttributeConstructorValues
     {
        [CtorValue(""Still Okay"", new int[] { 11, 13 })]
        public string? PropertyOne{ get; set; }
@@ -176,7 +175,7 @@ namespace MyNamespace
     }
 
     [NamedValue(NamedInt = 42, NamedStrings = new object[] { ""A"", ""B"", new object[] { ""C"" } })]
-    public class MyClass
+    public class WithAttributeNestedNamedValues
     {
         public string? PropertyOne{ get; set; }
     }
@@ -203,7 +202,7 @@ namespace MyNamespace
     }
 
     [CtorValue(""Okay"", new object[] { 1, 3, 5,  new object[] { 7 } })]
-    public class MyClass
+    public class WithAttributeNestedConstructorValues
     {
        public string? PropertyOne{ get; set; }
     }

@@ -39,37 +39,33 @@ namespace IncrementalGeneratorSamples
 }
 ";
 
-        public static string PartialCli(IEnumerable<CommandModel> commandModels, CancellationToken cancellationToken)
-        {
-            if (commandModels is null || !commandModels.Any())
-            { return ""; }
-
-            return $@"
+        public static string PartialCli(RootCommandModel rootCommandModel, CancellationToken _) 
+            => rootCommandModel is null
+                ? ""
+                : $@"
 namespace IncrementalGeneratorSamples
 {{
     internal partial class Cli
     {{
         static partial void SetRootCommand()
         {{
-            var rootHandler = {commandModels.First().Namespace}.RootCommand.CommandHandler.Instance;
+            var rootHandler = {rootCommandModel.Namespace}.RootCommand.CommandHandler.Instance;
             rootCommand = rootHandler.RootCommand;
         }}
     }}
 }}
 ";
-        }
 
-        public static string GenerateRootCommandCode(IEnumerable<CommandModel> commandModels, CancellationToken cancellationToken)
+        public static string GenerateRootCommandCode(RootCommandModel rootCommandModel, CancellationToken cancellationToken)
         {
-            if (commandModels is null || !commandModels.Any())
-            { return ""; }
-
-            return $@"
+            return rootCommandModel is null
+                ? ""
+                : $@"
 using IncrementalGeneratorSamples.Runtime;
 
 #nullable enable
 
-namespace {commandModels.First().Namespace};
+namespace {rootCommandModel.Namespace};
 
 public class RootCommand
 {{
@@ -80,18 +76,17 @@ public class RootCommand
 
         public CommandHandler() : base(string.Empty)
         {{
-            {CtorAssignments(commandModels)}
+            {CtorAssignments(rootCommandModel.CommandSymbolNames)}
         }}
     }}
 }}
 ";
-            string CtorAssignments(IEnumerable<CommandModel> options)
-                => string.Join("\n            ", options.Select(c => $"Command.Add({c.SymbolName}.CommandHandler.Instance.Command);"));
+            string CtorAssignments(IEnumerable<string> commandNames)
+                => string.Join("\n            ", commandNames.Select(c => $"Command.Add({c}.CommandHandler.Instance.Command);"));
         }
 
-
-        //public static string FileName(CommandModel modelData)
-        //    => $"{modelData?.Name}.g.cs";
+        public static string FileName(CommandModel modelData)
+            => $"{modelData?.SymbolName}.g.cs";
 
         public static string GenerateCommandCode(CommandModel commandModel, CancellationToken cancellationToken)
         {

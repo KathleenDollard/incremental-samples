@@ -24,7 +24,7 @@
       ]
     }
   ],
-  Name: MyClass,
+  Name: WithAttributeConstructorValues,
   XmlComments: ,
   Attributes: [
     {

@@ -1,6 +1,9 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
 namespace IncrementalGeneratorSamples
@@ -64,6 +67,12 @@ namespace IncrementalGeneratorSamples
                     options: options);
         }
 
-      
+        public static RootCommandModel GetRootCommandModel(ImmutableArray<CommandModel> classModels, CancellationToken _)
+            => GetRootCommandModel(classModels, CancellationToken.None);
+
+        public static RootCommandModel GetRootCommandModel(IEnumerable<CommandModel> classModels, CancellationToken _)
+            => classModels.Any()
+                ? new RootCommandModel(classModels.First().Namespace, classModels.Select(m => m.SymbolName))
+                : null;
     }
 }

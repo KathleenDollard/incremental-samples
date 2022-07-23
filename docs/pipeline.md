@@ -63,7 +63,7 @@ The transform step is called for every `SyntaxNode` that matches the predicate. 
 
 Often the model created from the syntax value provider is ready for generation and further pipeline operations are not needed.
 
-## Pipeline operations
+## Further transformations
 
 For the properties of the `IncrementalGeneratorInitializationContext` (everything except the `SyntaxProvider`), classes instances are contained in the value provider and these instances cannot be cached. The next step of the pipeline when you use these properties should be to call `Select` to extract a model that can be cached.
 

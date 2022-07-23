@@ -23,7 +23,7 @@
       ]
     }
   ],
-  Name: MyClass,
+  Name: WithAttributeNamedValue,
   XmlComments: ,
   Attributes: [
     {

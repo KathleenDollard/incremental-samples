@@ -16,7 +16,7 @@ namespace Benchmarks
         public ExtractData()
         {
             InputCode = new WithMultipleProperties().InputSourceCode;
-            XmlDocs = new WithXmlDescriptions().InitialClassModel.XmlComments;
+            XmlDocs = new WithXmlDescriptions().InitialClassModel?.XmlComments ?? "";
             var (_, symbol, _, cancellationToken, inputDiagnostics) = TestHelpers.GetTransformInfoForClass(InputCode, x => x.Identifier.ToString() == "MyClass");
             Symbol = symbol is null
                     ? throw new InvalidOperationException("symbol not found")
