@@ -103,7 +103,7 @@ namespace IncrementalGeneratorSamples.Test
                 .Select(t => GetInputSource(t, x => x.CommandModel));
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
-            var outputCode = CodeOutput.GenerateRootCommandCode(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);
+            var outputCode = CodeOutput.RootCommandCode(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);
 
             return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(className);
         }
@@ -120,7 +120,7 @@ namespace IncrementalGeneratorSamples.Test
                 ? testData.CommandModel
                 : throw new ArgumentException("Unexpected test input type", nameof(inputDataType));
 
-            var outputCode = CodeOutput.GenerateCommandCode(commandModel, TestHelpersCommon.CancellationTokenForTesting);
+            var outputCode = CodeOutput.CommandCode(commandModel, TestHelpersCommon.CancellationTokenForTesting);
 
             return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(className);
         }

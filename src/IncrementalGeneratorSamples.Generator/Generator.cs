@@ -41,13 +41,13 @@ namespace IncrementalGeneratorSamples
                 commandModelValues,
                 (outputContext, model) =>
                         outputContext.AddSource(CodeOutput.FileName(model),
-                             CodeOutput.GenerateCommandCode(model, outputContext.CancellationToken)));
+                             CodeOutput.CommandCode(model, outputContext.CancellationToken)));
 
             initContext.RegisterSourceOutput(
                 rootCommandValue,
                 (outputContext, rootModel) =>
                         outputContext.AddSource("Root.g.cs",
-                            CodeOutput.GenerateRootCommandCode(rootModel, outputContext.CancellationToken)));
+                            CodeOutput.RootCommandCode(rootModel, outputContext.CancellationToken)));
 
         }
 

@@ -148,3 +148,12 @@ Comments in the source code identify how the [initial extraction](initial-extrac
 
 The `GetModelFromAttribute` isolates the extraction implementation from source generator types. As shown in the section on the [initial extraction article on testing](initial-extraction.md#testing-the-example), you can create a symbol for testing. You cannot create an instance of `GeneratorAttributeSyntaxContext`. Your version of this method may use the `TargetNode` syntax token, the semantic model or the other attributes on the node, which are also supplied via the `GeneratorAttributeSyntaxContext`.
 
+## Testing the example
+
+Testing generation as a whole requires running the generator. There are a number of supporting methods that expose more details of compilation and generation that are generally needed to successfully write generators. Since these methods can seem complicated they are covered in [Integration testing](integration-testing.md). 
+
+Using these helper methods to test the example looks similar to other tests:
+
+[[ Delaying further work on integration testing until the rest gets out.]]
+
+

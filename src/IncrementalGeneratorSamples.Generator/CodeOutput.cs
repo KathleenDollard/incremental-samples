@@ -56,7 +56,7 @@ namespace IncrementalGeneratorSamples
 }}
 ";
 
-        public static string GenerateRootCommandCode(RootCommandModel rootCommandModel, CancellationToken cancellationToken)
+        public static string RootCommandCode(RootCommandModel rootCommandModel, CancellationToken cancellationToken)
         {
             return rootCommandModel is null
                 ? ""
@@ -88,7 +88,7 @@ public class RootCommand
         public static string FileName(CommandModel modelData)
             => $"{modelData?.SymbolName}.g.cs";
 
-        public static string GenerateCommandCode(CommandModel commandModel, CancellationToken cancellationToken)
+        public static string CommandCode(CommandModel commandModel, CancellationToken cancellationToken)
         {
             if (commandModel is null)
             { return ""; }
