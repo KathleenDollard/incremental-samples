@@ -1,0 +1,20 @@
+﻿{
+  Namespace: MyNamespace,
+  Options: [
+    {
+      Type: string?,
+      Name: --property-one,
+      OriginalName: PropertyOne,
+      SymbolName: PropertyOne,
+      LocalSymbolName: propertyOne,
+      Aliases: [],
+      Description: 
+    }
+  ],
+  Name: with-one-property,
+  OriginalName: WithOneProperty,
+  SymbolName: WithOneProperty,
+  LocalSymbolName: withOneProperty,
+  Aliases: [],
+  Description: 
+}

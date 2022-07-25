@@ -1,7 +1,0 @@
-﻿{
-  Namespace: MyNamespace,
-  Properties: [],
-  Name: MyClass,
-  XmlComments: ,
-  Attributes: []
-}

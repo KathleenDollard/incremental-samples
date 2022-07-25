@@ -1,76 +1,26 @@
-﻿
-using IncrementalGeneratorSamples.InternalModels;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Reflection;
 
 namespace IncrementalGeneratorSamples.Test
 {
     public static class TestHelpers
     {
-        public static CancellationToken CancellationTokenForTesting => new CancellationTokenSource().Token;
-
-        public static Compilation GetInputCompilation<TGenerator>(OutputKind outputKind, params string[] code)
-        {
-            var syntaxTrees = code.Select(x => CSharpSyntaxTree.ParseText(x)).ToArray();
-            var newUsings = new UsingDirectiveSyntax[] {
-            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.IO")),
-            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Collections.Generic")),
-            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System.Linq")),
-            SyntaxFactory.UsingDirective(SyntaxFactory .ParseName("System")) };
-            var updatedSyntaxTrees = syntaxTrees
-                .Select(x => x.GetCompilationUnitRoot().AddUsings(newUsings).SyntaxTree);
-
-            // REVIEW: Is there a better way to get the references
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var references = assemblies
-                .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
-                .Select(_ => MetadataReference.CreateFromFile(_.Location))
-                .Concat(new[]
-                {
-                MetadataReference.CreateFromFile(typeof(TGenerator).Assembly.Location),
-                });
-
-            var compilationOptions = new CSharpCompilationOptions(
-                outputKind,
-                nullableContextOptions: NullableContextOptions.Enable);
-
-
-            return CSharpCompilation.Create("compilation",
-                                            updatedSyntaxTrees,
-                                            references,
-                                            compilationOptions);
-        }
-
-        public static (Compilation compilation, GeneratorDriverRunResult runResult)
-            GenerateTrees<TGenerator>(Compilation inputCompilation)
-            where TGenerator : IIncrementalGenerator, new()
-        {
-            var generator = new TGenerator();
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation,
-                out var compilation, out var _);
-
-            var runResult = driver.GetRunResult();
-            return (compilation, runResult);
-        }
-
-        public static IEnumerable<Diagnostic> ErrorAndWarnings(IEnumerable<Diagnostic> diagnostics)
-            => diagnostics.Where(
-                    x => x.Severity == DiagnosticSeverity.Error ||
-                         x.Severity == DiagnosticSeverity.Warning);
-
         public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
-            GetTransformInfo(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
+            GetTransformInfoForClass(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
         {
+            // create a dummy cancellation token. These tests do not test cancellation
             var cancellationToken = new CancellationTokenSource().Token;
-            var compilation = TestHelpers.GetInputCompilation<Generator>(
+
+            // Get the compilation and check its state
+            var compilation = TestHelpersCommon.GetInputCompilation<Generator>(
                     OutputKind.DynamicallyLinkedLibrary, sourceCode);
             var inputDiagnostics = compilation.GetDiagnostics();
-            if (!continueOnInputErrors && TestHelpers.ErrorAndWarnings(inputDiagnostics).Any())
+            if (!continueOnInputErrors && TestHelpersCommon.WarningAndErrors(inputDiagnostics).Any())
             { return (null, null, null, cancellationToken, inputDiagnostics); }
-            var tree = compilation.SyntaxTrees.Single();
+
+            // Get the syntax tree and filter to expected node
+            var tree = compilation.SyntaxTrees.Single(); // tests are expected to have just one
             var matchQuery = tree.GetRoot()
                 .DescendantNodes()
                 .OfType<ClassDeclarationSyntax>();
@@ -79,8 +29,19 @@ namespace IncrementalGeneratorSamples.Test
             var matches = matchQuery.ToList();
             Assert.Single(matches);
             var syntaxNode = matches.Single();
+
+            // Return, null values are only returned on failure
             var semanticModel = compilation.GetSemanticModel(tree);
             return (syntaxNode, semanticModel.GetDeclaredSymbol(syntaxNode), semanticModel, cancellationToken, inputDiagnostics);
         }
+
+        public static void GenerateAndCompileProject<TGenerator>(IntegrationTestFromPathConfiguration configuration)
+            where TGenerator : IIncrementalGenerator, new( )
+            => TestHelpersCommon.GenerateAndCompileProject<TGenerator>(configuration.TestInputPath,
+               configuration.TestGeneratedCodePath, configuration.GeneratedSubDirectoryName, configuration.OutputKind);
+
+
+        public static string? RunCommand(IntegrationTestFromPathConfiguration configuration, string arguments)
+            => TestHelpersCommon.RunCommand(configuration.TestBuildPath, configuration.ExecutableName, arguments);   
     }
 }

@@ -1,4 +1,3 @@
-
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
@@ -9,35 +8,27 @@ namespace TestExample;
 
 public partial class ReadFile
 {
-    internal class CommandHandler : CommandHandler<CommandHandler>
+    internal class CommandHandler : CommandHandlerBase
     {
-        Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+        // Manage singleton instance
+        public static ReadFile.CommandHandler Instance { get; } = new ReadFile.CommandHandler();
 
-        public CommandHandler()
+        // Create System.CommandLine options
+        private Option<System.IO.FileInfo?> fileOption = new Option<System.IO.FileInfo?>("--file", "The file to read and display on the console.");
+
+        // Base constructor creates System.CommandLine and optins are added here
+        private CommandHandler()
             : base("read-file", "")
         {
-            SystemCommandLineCommand.AddOption(fileOption);
+            Command.AddOption(fileOption);
         }
 
-        /// <summary>
-        /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.
-        /// </summary>
-        /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
-        public override int Invoke(InvocationContext invocationContext)
+        // The code invoked when the user runs the command
+        protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
             var command = new ReadFile(GetValueForSymbol(fileOption, commandResult));
             return command.Execute();
-        }
-
-        /// <summary>
-        /// The handler invoked by System.CommandLine. This will not be public when generated is more sophisticated.
-        /// </summary>
-        /// <param name="invocationContext">The System.CommandLine Invocation context used to retrieve values.</param>
-        public override Task<int> InvokeAsync(InvocationContext invocationContext)
-        {
-            // Since this method is not implemented in the user source, we do not implement it here.
-            throw new NotImplementedException();
         }
     }
 }

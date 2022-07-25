@@ -1,0 +1,36 @@
+﻿
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using IncrementalGeneratorSamples.Runtime;
+
+#nullable enable
+
+namespace MyNamespace;
+
+public partial class WithAliasAttributes
+{
+    internal class CommandHandler : CommandHandlerBase
+    {
+        // Manage singleton instance
+        public static WithAliasAttributes.CommandHandler Instance { get; } = new WithAliasAttributes.CommandHandler();
+
+        // Create System.CommandLine options
+        private Option<string?> propertyOneOption = new Option<string?>("--property-one", --p, -prop1, "");
+
+        // Base constructor creates System.CommandLine and optins are added here
+        private CommandHandler()
+            : base("with-alias-attributes", "")
+        {
+            Command.AddAlias(command-alias);
+            Command.AddOption(propertyOneOption);
+        }
+
+        // The code invoked when the user runs the command
+        protected override int Invoke(InvocationContext invocationContext)
+        {
+            var commandResult = invocationContext.ParseResult.CommandResult;
+            var command = new WithAliasAttributes(GetValueForSymbol(propertyOneOption, commandResult));
+            return command.Execute();
+        }
+    }
+}

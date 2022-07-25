@@ -1,0 +1,26 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments:
+<member name="P:MyNamespace.WithXmlDescriptions.PropertyOne">
+    <summary>
+    This is the first property
+    </summary>
+</member>
+,
+      Attributes: []
+    }
+  ],
+  Name: WithXmlDescriptions,
+  XmlComments:
+<member name="T:MyNamespace.WithXmlDescriptions">
+    <summary>
+    This class is named WithXmlDescriptions
+    </summary>
+</member>
+,
+  Attributes: []
+}

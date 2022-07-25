@@ -1,0 +1,14 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments: ,
+      Attributes: []
+    }
+  ],
+  Name: WithOneProperty,
+  XmlComments: ,
+  Attributes: []
+}

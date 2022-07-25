@@ -1,0 +1,26 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments: ,
+      Attributes: []
+    },
+    {
+      Type: int,
+      Name: PropertyTwo,
+      XmlComments: ,
+      Attributes: []
+    },
+    {
+      Type: System.IO.FileInfo?,
+      Name: PropertyThree,
+      XmlComments: ,
+      Attributes: []
+    }
+  ],
+  Name: WithMultipleProperties,
+  XmlComments: ,
+  Attributes: []
+}

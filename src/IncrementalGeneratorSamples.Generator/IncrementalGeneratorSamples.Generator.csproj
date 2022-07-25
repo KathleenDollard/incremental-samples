@@ -8,8 +8,6 @@
 	  <IncludeBuildOutput>false</IncludeBuildOutput>
 	  <!-- NU5128 is a packaging warning when you don't have lib/ref folders. we're a generator, we're never going to have those. -->
 	  <NoWarn>$(NoWarn); NU5128</NoWarn>
-
-	  <PackageVersion>0.0.1-alphaR</PackageVersion>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -28,6 +26,5 @@
 	<ItemGroup Condition="'$(CreatePackage)' != 'true'">
 		<ProjectReference Include="../IncrementalGeneratorSamples.Runtime/IncrementalGeneratorSamples.Runtime.csproj" />
 	</ItemGroup>
-
 
 </Project>

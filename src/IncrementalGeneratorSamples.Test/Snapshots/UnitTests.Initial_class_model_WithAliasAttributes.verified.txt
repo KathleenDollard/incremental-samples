@@ -1,0 +1,34 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [
+    {
+      Type: string?,
+      Name: PropertyOne,
+      XmlComments: ,
+      Attributes: [
+        {
+          AttributeName: AliasAttribute,
+          ValueName: alias,
+          ValueType: string,
+          Value: --p
+        },
+        {
+          AttributeName: AliasAttribute,
+          ValueName: alias,
+          ValueType: string,
+          Value: -prop1
+        }
+      ]
+    }
+  ],
+  Name: WithAliasAttributes,
+  XmlComments: ,
+  Attributes: [
+    {
+      AttributeName: AliasAttribute,
+      ValueName: alias,
+      ValueType: string,
+      Value: command-alias
+    }
+  ]
+}

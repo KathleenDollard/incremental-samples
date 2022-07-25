@@ -1,0 +1,7 @@
+﻿{
+  Namespace: MyNamespace,
+  Properties: [],
+  Name: SimplestPractical,
+  XmlComments: ,
+  Attributes: []
+}

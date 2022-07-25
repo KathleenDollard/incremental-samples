@@ -1,7 +1,8 @@
-
 using System.CommandLine;
 
-namespace TestExample
+#nullable enable
+
+namespace IncrementalGeneratorSamples
 {
     internal partial class Cli
     {
@@ -9,12 +10,15 @@ namespace TestExample
         private static System.CommandLine.RootCommand? rootCommand = null;
 #pragma warning restore IDE0044 // Add readonly modifier
 
-        public static void Invoke(string[] args)
+        public static int Invoke(string[] args)
         {
             SetRootCommand();
             if (rootCommand is null)
-            { throw new InvalidOperationException("No classes were mared with the [Command] attribute"); }
-            rootCommand.Invoke(args);
+            {
+                Console.WriteLine("No classes were marked with the [Command] attribute");
+                return 1;
+            }
+            return rootCommand.Invoke(args);
         }
 
         static partial void SetRootCommand();

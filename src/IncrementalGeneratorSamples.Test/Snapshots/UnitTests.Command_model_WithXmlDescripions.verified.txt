@@ -1,0 +1,20 @@
+﻿{
+  Namespace: MyNamespace,
+  Options: [
+    {
+      Type: string?,
+      Name: --property-one,
+      OriginalName: PropertyOne,
+      SymbolName: PropertyOne,
+      LocalSymbolName: propertyOne,
+      Aliases: [],
+      Description: This is the first property
+    }
+  ],
+  Name: with-xml-descriptions,
+  OriginalName: WithXmlDescriptions,
+  SymbolName: WithXmlDescriptions,
+  LocalSymbolName: withXmlDescriptions,
+  Aliases: [],
+  Description: This class is named WithXmlDescriptions
+}

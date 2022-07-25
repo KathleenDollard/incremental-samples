@@ -34,7 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="InitialModelSnapshots\" />
+	  <Folder Include="Snapshots\" />
 	</ItemGroup>
 
 </Project>

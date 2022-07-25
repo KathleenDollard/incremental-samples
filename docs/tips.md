@@ -8,6 +8,26 @@ ms.topic: overview
 ---
 # Tips for creating generators
 
+## Overall
+
+### Let compiler and separate analyzers report diagnostics
+
+### Patience
+
+### Keep generator types out of your implementation code
+
+for testing, example `GetModelFromAttribute`
+
+## Troubleshooting
+
+### One or more steps of the generator do not run
+
+The steps of the pipeline are optimized, and if values are not used, they are not created. Check that output depends on the missing steps.
+
+> [!IMPORTANT]
+> When no generation is performed based on an incremental value(s) provider, it is not created. While this is generally not observable because generators should not have side effects other than generation, this may be confusing if you expect to hit breakpoints. This can occur either because there is no code output because you are early in development, or because there is only `RegisterImplementationSourceOutput` output.
+
+
 ## Code called in the generator pipeline must be pure
 
 What is purity
