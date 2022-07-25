@@ -8,31 +8,27 @@ ms.topic: overview
 ---
 # Roslyn Incremental Source Generators Overview
 
-Source generators are run by the compiler to add C# or VB code to the compilation. Roslyn *incremental source generators* are defined as a series of steps called by the compiler which allows the compiler to shortcut if the results of any step in its cache is unchanged. Incremental generators are also granular and manage the cache independently for each item in a collection. The compiler can also cancel after each step. These features allow incremental generators to minimize the work performed and provide a pattern that is maintainable and testable.
+Source generators are run by the compiler to add C# or VB code to the compilation. Roslyn *incremental source generators* define as a series of steps which allow the generator to avoid unnecessary work if the result in the cache of any step is unchanged. Incremental generators are granular and manage the cache independently for each item in a collection. Incremental generators can be easily canceled by the host process, because any further work by the user invalidates the current generation cycle. These features allow incremental generators to minimize the work performed and provide a pattern that is maintainable and testable.
 
-Source generators run during both design time builds and [[full]] builds. This allows them to extend user code with new code that adds classes, methods and properties that immediately affect the users experience via features like IntelliSense. It also means that generators run very often - each time a new design-time compilation is created. 
+Source generators run during both design time builds and [[full]] builds. This allows them to extend user code with new code that adds classes, methods and properties that immediately affect the users experience via features like IntelliSense. It also means that generators run very often - each time a new design-time compilation is created, generally when the user pauses typing.
+
 Most programmers will not need to write source generators, but will take advantage of those written by others. If you do write a generator, follow the [Performance Guidelines]() and be [tested for performance]() because your generator can adversely affect the design time performance of editors such as Visual Studio. Source generators are new and we are evolving guidance on banned APIs, so feel free to reach out at [[@Jaredpa and @chsienki where?]] if you want to check the impact of a technique.
 
 > [!CAUTION]
-> We will disable generators during the design time build if they are slow or analysis indicates that they do not follow guidelines.
+> We will disable generators during the design time build if they are slow or analysis indicates that they do not follow guidelines. We will also report slow generators to users. All generators will run on full builds.
 
-Source generators are an advanced feature. This article assumes that you understand the basics of the [Roslyn compiler](), [syntax trees](), [compilations](), [compilation](), [cancellation tokens]() and the [difference between value and reference equality](). It will also help to have an understanding of functional techniques using delegates such as lambda expressions.
-
-## How often generators run
-
-[[Review folks: Is this following correct, and does it over-share. Or shall we drop this and in line say they run "very often, up to running on every keystroke"]]
-Generators run when the editor determines they should be run,which could be as often as every keystroke. But Visual Studio is smart and keeps a cached compilation to use when the user is typing quickly and does not need to see updated compile time features like IntelliSense, analyzer, and generator results. Visual Studio has evolving rules on when it updates the design compilation and does it as often as possible without hurting performance.
+Source generators are an advanced feature. This article assumes that you understand the basics of the [Roslyn compiler](), [syntax trees](), [compilations](), [cancellation]() and the [value and reference equality](). It will also help to have an understanding of functional pipeline techniques using delegates such as lambda expressions.
 
 ## How Roslyn generators work
 
-When the Roslyn compiler runs without generation, it reads user code and builds a set of syntax trees, generally one syntax tree per file. Based on this, the compiler builds a compilation and emits [IL]() based on the compilation:
+When the Roslyn compiler runs with no referenced generators, it reads user code and builds a set of syntax trees, generally one syntax tree per file. Based on this, the compiler builds a compilation and emits [IL]():
 
 ```mermaid
 flowchart LR
     SyntaxTrees-->Compilation-->IL
 ```
 
-When generators are present, the Roslyn compiler inserts an extra step between creating the compilation and emitting the IL which runs the generators and adds any syntax trees they create. It then rebuilds the compilation before emitting the IL:
+When generators are present, the Roslyn compiler inserts an extra step between creating the compilation and emitting the IL. This step runs the generators and adds any syntax trees they create. The compiler then creates a new compilation which is used to emit IL:
 
 ```mermaid
 flowchart LR
@@ -41,19 +37,33 @@ flowchart LR
     SyntaxTrees-->Comp2
 ```
 
-Syntax trees are a full representation of the code the user wrote. The compilation includes several things that may be interersting to your generator, including the semantic model.
+Syntax trees are a full representation of the code the user wrote. Syntax trees are not resolved - for example a method invocation is just the name of the method and not yet connected to the method declaration. Syntax trees are also structurally the same as the input code and very detailed and includes everything in the source file, including whitespace. The compilation includes several things that may be interesting to your generator, including the syntax trees, the semantic model and diagnostics. The semantic model is the resolved logical view of the source code. Because it is resolved, you can access the method declaration from a method invocation, for example. The semantic model does not contain trivia, but does contain supporting information not used in IL, such as XML comments.
 
-In some cases additional information is needed, perhaps from a configuration file:
+Additional information may be needed for generation, perhaps from a configuration:
 
 ```mermaid
 flowchart LR
-    ConfigFile[Config file]-->Generators
+    ConfigFile[Configuration]-->Generators
     SyntaxTrees-->Comp1[Compilation]-->Generators-->More[More SyntaxTrees]-->Comp2[Compilation]-->IL
     SyntaxTrees-->Generators
     SyntaxTrees-->Comp2
 ```
 
-In some cases, such as creating a strongly typed wrapper for a comma delimited file (`.csv`), the initial compilation might not be used by the generator, but it is always available to it.
+[[ Review: Is the configuration provider fast enough for us to be comfortable using it in this example. ]]
+
+Generation may use other files. For example, creating a strongly typed wrapper for a comma delimited file (`.csv`) might not use the initial compilation at all, but it is always available to it.
+
+```mermaid
+flowchart LR
+    Input[CSV file]-->Generators-->Comp2[Compilation]-->IL
+    SyntaxTrees-.->Generators
+    SyntaxTrees-->Comp2
+```
+
+> [!IMPORTANT]
+> External files are not part of the user's compilation and therefore generation using them is never needed for design time compilation. These generators should use `RegisterImplementationSourceOutput` rather than `RegisterSourceOutput` to indicate they are only needed during full builds.
+
+[[ Review: The warning above assumes my understanding that merely saving a file does not make it available to design time compilation. Is more nuance needed on this, as in, do these generators require a special article. Also, if saving a file is enough to make it available to design time compilation (and thus it is useful), is the file based provider slow enough we want a warning here? ]]
 
 Each generator uses the same set of syntax trees and compilation, so generators are independent and do not know what was produced by other generators.
 
@@ -64,9 +74,9 @@ flowchart LR
         gen2[Generator]
         gen3[Generator]
     end
-    subgraph syntaxAndCompilation[Syntax/compilation]
-      syntaxTrees
-      comp1
+    subgraph syntaxAndCompilation [Syntax/compilation]
+     direction TB
+     syntaxTrees-->comp1[Compilation]
     end
     syntaxAndCompilation-->gen1[Generator]-->more1[More SyntaxTrees]-->comp2[New compilation]
     syntaxAndCompilation-->gen2[Generator]-->more2[More SyntaxTrees]-->comp2
@@ -79,7 +89,7 @@ Both V1 Roslyn source generators and Roslyn incremental source generators follow
 
 ### V1 Roslyn source generators
 
-There are two kinds of Roslyn generators: V1 generators and incremental generators. The design of V1 generators does not allow important optimizations, particular in retrieving input data from SyntaxTrees or external data sources, caching and cancellation. Due to shortcomings in V1 generators, Roslyn incremental generators were created as a second generation of Roslyn source generators was created with these goals:
+There are two kinds of Roslyn generators: V1 generators and incremental generators. The design of V1 generators does not provide important optimizations such as caching and cancellation. Due to shortcomings in V1 generators, Roslyn incremental generators were created as a second generation of Roslyn source generators with these goals:
 
 * Allow for a finer grained approach to defining a generator.
 * Scale source generators to support 'Roslyn/CoreCLR' scale projects in Visual Studio.
@@ -96,44 +106,33 @@ All new generators should be incremental source generators.
 
 ### Incremental generators
 
-Incremental generators are built with a series of steps that collect data, transform the data if necessary and output code. These steps are defined via delegates (such as lambda expressions) to create a pipeline.
+Incremental generators are built as a series of steps that collect data, transform the data if necessary, and output code. These steps are defined via delegates (such as lambda expressions) to create the pipeline. The generator caches the result of each step and assumes that further steps are unneeded if their input is unchanged. The previous cached value of those later steps is used instead.
 
-This design allows the results of each step to be cached by the generation infrastructure. When generation is rerun, the previous results of each step can be compared and further generation steps skipped. If there are no changes, the compiler can simply reuse the cached output of the each step.
+This incremental generator design allows cancellation at each step, and supports the code of each step responding to cancellation. When the user is editing, your generator is likely to be canceled more often than its results are used, because any changes to the user's code invalidates the previous compilation.
 
-This design also allows cancellation at each step. During editing, your generator may be canceled more often than it runs to completion, because each keystroke invalidates the previous compilation.
+In addition to these benefits to how your generator runs, the incremental generator design isolates evaluating input to create a model from transforming the model and isolates creating of code. Once you understand this approach, isolation makes your generator easier to design and test.
 
-In addition to these benefits to how your generator runs, this design isolates evaluation of input from the creation of code. Once you understand this approach, this isolation makes your generator easier to design and testable for non-trivial generators.
-
-The incremental generators design is based on a pipeline. As a simple example, you might extract the syntax nodes that have a specific attribute applied and evaluate those nodes to extract some data. Then, you might use that data to create source code:
+The incremental generators design is based on a pipeline. As a simple example, you might extract the syntax nodes that have a specific attribute applied and evaluate those nodes to extract some data which you use to create source code:
 
 ```mermaid
 flowchart LR
-    Extract[Extract data from syntax nodes/compilation]-->Generate[Output code]
+    Extract[Extract data from syntax nodes/compilation]-->|model|Generate[Output code]
 ```
 
-In the pipeline, the extraction step is a delegate and the step to output code is a separate delegate:
+In the pipeline, the extraction step is a delegate and the step to output code is a separate delegate.
 
 The most common case is to extract data, transform it, and then output code, each as a separate delegate passed to one of the pipeline methods:
 
 ```mermaid
 flowchart LR
-    Extract[Extract from syntax nodes/compilation]-->Transform-->Generate[Output code]
+    Extract[Extract from syntax nodes/compilation]-->|model|Transform-->|another model|Generate[Output code]
 ```
 
-The majority of time that your generator runs, the code it depends on will be unchanged because the user is editing some other part of their solution. In fact, much of the time the user will be editing code that does not affect any generator and the previous compilation itself can be used!
+The majority of time that your generator runs, the code it depends on will be unchanged because the user is editing some other part of their solution. 
 
-Even if the syntax nodes you are extracting are not changed, the compilation will have changed if your generator runs. That's because something else in the model may have changed and may affect your generation. So these steps are performed together:
+Stepwise generation allows for complex generators when they are needed. For example, you may need to gather data from orthogonal syntax nodes, external files or other sources. Your transformation may involve multiple steps combining and summarizing individual sources. And you may output multiple files. Treating each of these as an independent step allows you to understand each step and test and debug it separately. It may take a bit to shift into the functional mindset of delegates in a pipeline, but the payoff of an logical, efficient, and testable generator makes it worth the effort.
 
-```mermaid
-flowchart LR
-    subgraph extract[ ]
-        syntax[Extract from syntax]
-        semantic[Extract from compilation]
-    end
-    extract-->Transform-->Generate[Output code]
-```
-
-Stepwise generation allows for complex generators when they are needed. For example, you may need to gather data from orthogonal syntax nodes, external files or other sources. Your transformation may involve multiple steps combining and summarizing individual sources. And you may output multiple files. Treating each of these as an independent step allows you to understand each step and test and debug it independently. It may take a bit to shift into the functional mindset of delegates in a pipeline, but the payoff of an logical, efficient, and testable generator makes it worth the effort.
+[[ Review; mention of using external files - good or bad ]]
 
 ## Limitations of generators
 
@@ -147,16 +146,16 @@ Programmers expect that the code they write will run. Roslyn source generators s
 
 Once code is generated, the user cannot change it. This is enforced by Visual Studio, but more importantly the next compilation would ignore and overwrite any user changes.
 
-To create code the user can edit and build on, use [.NET templating]().
+To create code the user can edit, use [.NET templating]().
 
 ### Generators cannot be ordered or dependent
 
-Each generator is independent and does not rely on any other generator. Any mechanism for ordering or dependency will eventually result in a conflict with no realistic route to resolution by the user of conflicting generators.
+Each generator is independent and does not rely on any other generator. Any mechanism for ordering or dependency between generators will eventually result in a conflict with no realistic route to resolution by the user of conflicting generators.
 
-Also, generators depending on other generators would require the compilation to be recreated many more times, and we do not believe we could do this and preserve design time performance.
+Also, generators depending on other generators would require the compilation to be recreated many times, and we do not believe we could do this and preserve design time performance.
 
-We are aware that some small loosening of this restriction would be useful, and are working on designs in this space.
+We are aware that some small loosening of this restriction would be useful, and are working on designs in this space, possibly involving a small number of specific generation phases. [[ Review: do we have an issue on this we can link? ]]
 
 ### Generators only create C# and Visual Basic code
 
-While generators can read files for additional input, such as configuration information, they can only add to a compilation, and cannot output files directly. We would like feedback about your scenario if you need to output files that are not VB or C# code.
+While generators can read files for additional input, such as configuration information, they can only add to a compilation, and cannot output files directly. We would like feedback about your scenario if you need to output files that are not VB or C# code. [[ Review: do we have an issue on this we can link? ]]

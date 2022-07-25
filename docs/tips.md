@@ -10,6 +10,8 @@ ms.topic: overview
 
 ## Overall
 
+### Let compiler and separate analyzers report diagnostics
+
 ### Patience
 
 ### Keep generator types out of your implementation code
