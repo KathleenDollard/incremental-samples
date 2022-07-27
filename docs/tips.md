@@ -12,6 +12,8 @@ ms.topic: overview
 
 ### Let compiler and separate analyzers report diagnostics
 
+### Managing VS versions and new APIs :(
+
 ### Patience
 
 ### Keep generator types out of your implementation code

@@ -6,7 +6,7 @@ ms.author: kdollard
 ms.date: 6/11/2022 
 ms.topic: overview
 ---
-# Roslin incremental source generators
+# Roslyn incremental source generators
 
 Roslyn incremental generators are run by the compiler to add source code to the compilation. They are built on the concept of a [pipeline](pipeline.md) of actions to be performed later. The pipeline allows caching, which avoids doing any unnecessary work. Since source generators are run quite often, the previous output can be reused in the vast majority cases. The major difference between Roslyn V1 source generators and Roslyn incremental source generators is that incremental source generators use this pipeline and caching to avoid unnecessary work. Incremental generators must be written correctly for this caching to work.
 
