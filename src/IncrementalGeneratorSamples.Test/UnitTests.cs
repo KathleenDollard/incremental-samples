@@ -1,4 +1,5 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace IncrementalGeneratorSamples.Test
@@ -15,20 +16,21 @@ namespace IncrementalGeneratorSamples.Test
         }
 
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithOneProperty", typeof(WithOneProperty))]
-        [InlineData("WithMultipleProperties", typeof(WithMultipleProperties))]
-        [InlineData("WithXmlDescriptions", typeof(WithXmlDescriptions))]
-        [InlineData("WithAliasAttributes", typeof(WithAliasAttributes))]
-        [InlineData("WithAttributeNamedValue", typeof(WithAttributeNamedValues))]
-        [InlineData("WithAttributeConstructorValues", typeof(WithAttributeConstructorValues))]
-        [InlineData("WithAttributeNestedNamedValues", typeof(WithAttributeNestedNamedValues))]
-        [InlineData("WithAttributeNestedConstructorValues", typeof(WithAttributeNestedConstructorValues))]
-        public Task Initial_class_model(string className, Type inputDataType)
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(WithOneProperty))]
+        [InlineData( typeof(WithMultipleProperties))]
+        [InlineData( typeof(WithXmlDescriptions))]
+        [InlineData( typeof(WithAliasAttributes))]
+        [InlineData( typeof(WithAttributeNamedValues))]
+        [InlineData( typeof(WithAttributeConstructorValues))]
+        [InlineData( typeof(WithAttributeNestedNamedValues))]
+        [InlineData( typeof(WithAttributeNestedConstructorValues))]
+        public Task Initial_class_model(Type inputDataType)
         {
             var inputSource = GetInputSource(inputDataType, x => x.InputSourceCode);
+            var className = inputDataType.Name;
             var (_, symbol, _, cancellationToken, inputDiagnostics) = 
-                TestHelpers.GetTransformInfoForClass(inputSource, x => x.Identifier.ToString()==className);
+                TestHelpers.GetTransformInfoForClass<ClassDeclarationSyntax>(inputSource, x => x.Identifier.ToString()==className);
             Assert.Empty(TestHelpersCommon.WarningAndErrors(inputDiagnostics));
             Assert.NotNull(symbol);
 

@@ -124,7 +124,7 @@ namespace MyNamespace
     }
 
     [NamedValue(NamedInt = 42, NamedStrings = new string[] { ""A"", ""B"", ""C"" })]
-    public class WithAttributeNamedValue
+    public class WithAttributeNamedValues
     {
         [NamedValue(NamedInt = 43, NamedStrings = new string[] { ""D"" })]
         public string? PropertyOne{ get; set; }

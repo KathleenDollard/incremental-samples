@@ -8,22 +8,26 @@ ms.topic: conceptual
 ---
 # Design generator input
 
-Input data can come from several sources as discussed in [pipelines subsection]
+Input data can come from several providers as discussed in [Pipelines](pipelines.md). This section will focus on designing input for use with those syntax providers, focusing on a design that uses attribute syntax provider.
 
-When source generators use C# or VB code as input, they often create special rules that are more strict than C# syntax. This code is not executed during generation, and in many cases is never executed. You must extract information from the code itself, and that information must be available to the compiler. There is minimal ability to understand calculations and control flow.
+## Attributes
 
-Attributes are useful in designing input, in addition to being very fast during generation. The RegEx generator in .NET 7 is a good example. This is an optimizing generator, and the code prior to generation looks like:
+Attributes are useful in designing input and also allow very fast generation. The RegEx generator in .NET 7 is a good example. This is an optimizing generator, and the non-optimized code version of this code is:
 
 ```csharp
 private static readonly Regex s_myCoolRegex = new Regex("abc|def", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 ```
 
-Using the RegexGenerator attribute, this becomes:
+The optimizing generator creates a scoped partial method. [Designing generator output](design-output.md) and [the docs for partial methods]() cover the difference between scoped and non-scoped partial methods. The user writes a  
 
 ```csharp
 [RegexGenerator("abc|def", RegexOptions.IgnoreCase)]
 private static partial Regex MyCoolRegex();
 ```
+
+When source generators use C# or VB code as input, they often create special rules that are more strict than C# syntax. This code is not executed during generation, and in many cases is never executed. You must extract information from the code itself, and that information must be available to the compiler. There is minimal ability to understand calculations and control flow.
+
+
 
 Because the information for generation are compile time constants, the programmer using the generator won't be be able to supply a calculation.
 

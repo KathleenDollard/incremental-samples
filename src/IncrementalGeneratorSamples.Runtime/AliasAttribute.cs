@@ -2,7 +2,7 @@
 
 namespace IncrementalGeneratorSamples.Runtime
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = true)]
     public sealed class AliasAttribute : Attribute
     {
         public AliasAttribute(string alias)

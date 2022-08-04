@@ -315,31 +315,27 @@ The values passed to attributes must be constants, arrays or types. This is repr
 
 ## Testing the example
 
-Testing every step of the generator results in a system that is easier to debug and understand, as well as making the development process much smoother. With the exception of extracting the attributes, this code is relatively straightforward. Setting up a test harness for this step requires a bit of supporting code because you need to create a semantic model. Later steps can be tested in isolation by manually creating the input types, and finally an end to end integration test allows you to test your generator wiring.
+Testing every step of the generator results in a system that is easier to debug and understand, as well as making the development process much smoother. With the exception of extracting the attributes, this code is relatively straightforward. Setting up a test harness for this step requires a bit of supporting code because you need the symbol which is part of the semantic model and is a bit complex to create. Later steps can be tested in isolation by manually creating the input types, and finally an end to end integration test allows you to test your generator wiring.
 
 Generation requires a lot of detail and you will frequently mess up more than one thing. To manage this, use a verification tool such as [Verify]() or [ApprovalsTest](). These present a diff between the expected output and the current output. You can see exactly what differs in your diff tools. When verifying instances of types such as our output, Verify serializes the data with Newtonsoft.Json.
 
-If the current output is correct, you simply copy it to the verified file - usually by copying the left pane to the right in your diff tool. While far more efficient than finding the problems in strings compared with `Assert.Equal`, it still becomes tedious with a large number of tests. This example tracks five test conditions through to outputting code, and has four additional scenarios to test the supported variations in managing attributes.
+If the current output is correct, you simply copy it to the verified file - usually by copying the left pane to the right in your diff tool. While far more efficient than finding the problems in strings compared with `Assert.Equal`, it still becomes tedious with a large number of tests so a mechanism for reusing support code is helpful. This example uses XUnit's Theory feature and tracks five test conditions through to outputting code, as well as four additional scenarios to test the supported variations in managing attributes:
 
-> [!IMPORTANT]
-> If you receive an error that Newtonsoft.Json cannot serialize a type, resolve this by removing the type or altering the type to make it serializable. For example, if you try to serialize a `TypedConstant`, you will get an error. Returning a `TypedConstant` or any of almost any type of the semantic model or syntax tree is an mi9stake and will break value equality and caching.
-
-These tests use XUnit's `Theory` feature because each scenario goes through exactly the same test:
 
 ```csharp
 [UsesVerify]
 public class InitialModelTests
 {
     [Theory]
-    [InlineData("SimplestPractical", typeof(SimplestPractical))]
-    [InlineData("WithOneProperty", typeof(WithOneProperty))]
-    [InlineData("WithMultipleProperties", typeof(WithMultipleProperties))]
-    [InlineData("WithXmlDescriptions", typeof(WithXmlDescriptions))]
-    [InlineData("WithAliasAttributes", typeof(WithAliasAttributes))]
-    [InlineData("WithAttributeNamedValue", typeof(WithAttributeNamedValues))]
-    [InlineData("WithAttributeConstructorValues", typeof(WithAttributeConstructorValues))]
-    [InlineData("WithAttributeNestedNamedValues", typeof(WithAttributeNestedNamedValues))]
-    [InlineData("WithAttributeNestedConstructorValues", typeof(WithAttributeNestedConstructorValues))]
+    [InlineData( typeof(SimplestPractical))]
+    [InlineData( typeof(WithOneProperty))]
+    [InlineData( typeof(WithMultipleProperties))]
+    [InlineData( typeof(WithXmlDescriptions))]
+    [InlineData( typeof(WithAliasAttributes))]
+    [InlineData( typeof(WithAttributeNamedValues))]
+    [InlineData( typeof(WithAttributeConstructorValues))]
+    [InlineData( typeof(WithAttributeNestedNamedValues))]
+    [InlineData( typeof(WithAttributeNestedConstructorValues))]
     public Task Initial_class_model(string fileNamePart, Type inputDataType)
     {
         var inputSource = Activator.CreateInstance(inputDataType) is TestData testData
@@ -356,17 +352,17 @@ public class InitialModelTests
 }
 ```
 
-Theory tests have parameters. Here, this is an identifier used in file naming, and a type. while a string constant would work for the source code, tests in the next section will create instances of types for each scenario that are used in later testing.
+Theory tests have parameters. Here, this is a type that contains test details for the scenario that can be reused to test each step in the generation pipeline.
 
 Verify expects the test to return a Task.
 
-The first step of the test is to retrieve the input source code. This is passed to a rather helper method to retrieve the symbol. The syntax node and semantic model are ignored. 
+In the *Arrange* part of the text, the source code is retrieved from the scenario and passed to a helper method to  retrieve the symbol, which can also be used to access the semantic model.
 
 The *Act* portion of the test is the call to the `ModelBuilder.GetInitialModel` method that was discussed earlier in this article.
 
 A subdirectory is specified for the test output so that these text files are not mixed up with the C# classes of the test project and specifying `UseTextForParameters` ensures a readable name for each test.
 
-`TestData` is a base class which each scenario derives from. This type is:
+`TestData` is a base class which each scenario derives from. The scenario type will be expanded  in later examples to support integration tests. The portion of the type used in this test is:
 
 ```csharp
     public class TestData
@@ -396,42 +392,12 @@ public class MyClass{}
 }
 ```
 
-Testing later steps of the generator will use the techniques discussed above. Creating the `ITypeSymbol` is more complicated;
+> [!IMPORTANT]
+> If you receive an error that Newtonsoft.Json cannot serialize a type, resolve this by removing the type or altering the type to make it serializable. For example, if you try to serialize a `TypedConstant`, you will get an error. Returning a `TypedConstant` or any of almost any type of the semantic model or syntax tree is an mi9stake and will break value equality and caching.
 
-```csharp
-    public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
-        GetTransformInfoForClass(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
-    {
-        // create a dummy cancellation token. These tests do not test cancellation
-        var cancellationToken = new CancellationTokenSource().Token;
+### Helper methods
 
-        // Get the compilation and check its state
-        var compilation = GetInputCompilation<Generator>(
-                OutputKind.DynamicallyLinkedLibrary, sourceCode);
-        var inputDiagnostics = compilation.GetDiagnostics();
-        if (!continueOnInputErrors && TestHelpers.ErrorAndWarnings(inputDiagnostics).Any())
-        { return (null, null, null, cancellationToken, inputDiagnostics); }
-
-        // Get the syntax tree and filter to expected node
-        var tree = compilation.SyntaxTrees.Single(); // tests are expected to have just one
-        var matchQuery = tree.GetRoot()
-            .DescendantNodes()
-            .OfType<ClassDeclarationSyntax>();
-        if (filter is not null)
-        { matchQuery = matchQuery.Where(x => filter(x)); }
-        var matches = matchQuery.ToList();
-        Assert.Single(matches);
-        var syntaxNode = matches.Single();
-
-        // Return, null values are only returned on failure
-        var semanticModel = compilation.GetSemanticModel(tree);
-        return (syntaxNode, semanticModel.GetDeclaredSymbol(syntaxNode), semanticModel, cancellationToken, inputDiagnostics);
-    }
-```
-
-This method returns a tuple of the SyntaxNode, the symbol, the semantic model, the cancellation token, and the any diagnostics received as part of creating the compilation. 
-
-This helper method reduces the boilerplate in tests to include a common set of using statements in the compilation. Creating the compilation requires knowing the correct assemblies to include. Here this is done by adopting the assemblies of the test project:
+Testing the initial extraction and integration testing shown later require access to the compilation Creating a compilation is a bit complex because it needs the full context, particularly any referenced assemblies. It also details you otherwise might not consider, such as output type, global usings, and whether nullable reference type checks should be enabled:
 
 ```csharp
     public static Compilation GetInputCompilation<TGenerator>(OutputKind outputKind, params string[] code)
@@ -467,6 +433,44 @@ This helper method reduces the boilerplate in tests to include a common set of u
                                         compilationOptions);
     }
 ``````
+
+The `GetTransformInfoForClass` method retrieves the compilation and uses it to retrieve a symbol. It is valuable to check that the input compilation has no unexpected errors, because typos in the input source code is a common type of error, and for this test, only one input syntax node is allowed:
+
+```csharp
+    public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, 
+            CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
+        GetTransformInfoForClass<T>(string sourceCode, Func<T, bool>? filter = null, bool continueOnInputErrors = false)
+        where T: SyntaxNode
+    {
+        // create a dummy cancellation token. These tests do not test cancellation
+        var cancellationToken = new CancellationTokenSource().Token;
+
+        // Get the compilation and check its state
+        var compilation = TestHelpersCommon.GetInputCompilation<Generator>(
+                OutputKind.DynamicallyLinkedLibrary, sourceCode);
+        var inputDiagnostics = compilation.GetDiagnostics();
+        if (!continueOnInputErrors && TestHelpersCommon.WarningAndErrors(inputDiagnostics).Any())
+        { return (null, null, null, cancellationToken, inputDiagnostics); }
+
+        // Get the syntax tree and filter to expected node
+        var tree = compilation.SyntaxTrees.Single(); // tests are expected to have just one
+        var matchQuery = tree.GetRoot()
+            .DescendantNodes()
+            .OfType<T>();
+        if (filter is not null)
+        { matchQuery = matchQuery.Where(x => filter(x)); }
+        var matches = matchQuery.ToList();
+        Assert.Single(matches);
+        var syntaxNode = matches.Single();
+
+        // Return, null values are only returned on failure
+        var semanticModel = compilation.GetSemanticModel(tree);
+        return (syntaxNode, semanticModel.GetDeclaredSymbol(syntaxNode), semanticModel, cancellationToken, inputDiagnostics);
+    }
+```
+
+This method returns a tuple of the SyntaxNode, the symbol, the semantic model, the cancellation token, and any diagnostics received as part of creating the compilation. 
+
 
 With code like this, creating a new scenario just involves creating a new scenario type and adding it to the test theory.
 

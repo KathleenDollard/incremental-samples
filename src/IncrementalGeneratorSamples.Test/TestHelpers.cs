@@ -7,7 +7,8 @@ namespace IncrementalGeneratorSamples.Test
     public static class TestHelpers
     {
         public static (SyntaxNode? syntaxNode, ISymbol? symbol, SemanticModel? semanticModel, CancellationToken cancellationToken, IEnumerable<Diagnostic> inputDiagnostics)
-            GetTransformInfoForClass(string sourceCode, Func<ClassDeclarationSyntax, bool>? filter = null, bool continueOnInputErrors = false)
+            GetTransformInfoForClass<T>(string sourceCode, Func<T, bool>? filter = null, bool continueOnInputErrors = false)
+            where T: SyntaxNode
         {
             // create a dummy cancellation token. These tests do not test cancellation
             var cancellationToken = new CancellationTokenSource().Token;
@@ -23,7 +24,7 @@ namespace IncrementalGeneratorSamples.Test
             var tree = compilation.SyntaxTrees.Single(); // tests are expected to have just one
             var matchQuery = tree.GetRoot()
                 .DescendantNodes()
-                .OfType<ClassDeclarationSyntax>();
+                .OfType<T>();
             if (filter is not null)
             { matchQuery = matchQuery.Where(x => filter(x)); }
             var matches = matchQuery.ToList();
