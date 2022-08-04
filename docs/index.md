@@ -30,14 +30,15 @@ In addition to these challenges, incremental generators have additional challeng
 * Incremental generators are a radical shift from Roslyn V1 source generators.
 * Pipelines are a powerful technique that is common in functional programming, but many C# programmers are not familiar with it.
 
+> [!IMPORTANT]
+> Roslyn incremental generators must target .NET Standard 2.0. The supported language version for .NET Standard will use C# 7.3..
+
 These articles explain how Roslyn incremental source generators work and how to setup an inner loop three kinds of test:
 
 * [Overview](overview.md)
 * [Pipeline](pipeline.md)
-* [Creating an incremental source generator](creating-a-source-generator/index.md)
-* [Testing generators via the compilation](testing-generators-compilation.md)
+* [Creating an incremental source generator](creating-a-source-generator/index.md) (walk-through)
 * [Performance Guidelines](performance-guidelines.md)
-* [Tutorial](tutorial.md)
 * Converting V1 Roslyn source generators (future article)
 * [Tips](tips.md)
 

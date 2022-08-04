@@ -67,10 +67,10 @@ namespace IncrementalGeneratorSamples
                     options: options);
         }
 
-        public static RootCommandModel GetRootCommandModel(ImmutableArray<CommandModel> classModels, CancellationToken _)
-            => GetRootCommandModel(classModels, CancellationToken.None);
+        //public static RootCommandModel GetRootCommandModel(ImmutableArray<CommandModel> classModels, CancellationToken _)
+        //    => GetRootCommandModel(classModels, CancellationToken.None);
 
-        public static RootCommandModel GetRootCommandModel(IEnumerable<CommandModel> classModels, CancellationToken _)
+        public static RootCommandModel GetRootCommandModel(ImmutableArray<CommandModel> classModels, CancellationToken _)
             => classModels.Any()
                 ? new RootCommandModel(classModels.First().Namespace, classModels.Select(m => m.SymbolName))
                 : null;

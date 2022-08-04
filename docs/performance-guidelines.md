@@ -30,7 +30,7 @@ You should understand [Roslyn incremental generator overalldesign](overview.md) 
 
 ## Do not do slow things
 
-Do not do things that are slow. Do not do tricky stuff. Don't emit code, don't write files, etc. If there is something you need to do, chat with us. We reserve the right to mark or remove badly behaving generators from design time compilation and to ban certain APIs. If you aren't sure, ask us about impact on incremental generator performance][[ Review: how and where or do we want to not say this? ]].
+Do not do things that are slow. Do not do tricky stuff. Don't emit code, don't write files, etc. If there is something you need to do, chat with us. We reserve the right to mark or remove badly behaving generators from design time compilation and to ban certain APIs. If you aren't sure, ask us about impact on incremental generator performance[[ Review: how and where or do we want to not say this? ]].
 
 ## Use cancellation tokens
 

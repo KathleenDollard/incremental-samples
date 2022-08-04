@@ -30,7 +30,7 @@ The predicate allows further filtering of nodes that are decorated with the spec
 
 When using `ForAttributeWithMetadataName` the predicate may not be needed because the attribute filtering is sufficient. In this case, simply return true.
 
-When using `CreateSyntaxProvider` the predicate should never just return true. It will be passed every syntax node in the project - and that might be millions of syntax nodes. This is why this approach cannot be made performant in large projects. If you are using this approach, the first step should always be to filter syntax nodes on [[REVIEW: pattern match to type or use kind, or pattern match if you have work you need a typed value for, and otherwise kind??]]
+When using `CreateSyntaxProvider` the predicate should never just return true. It will be passed every syntax node in the project - and that might be millions of syntax nodes. This is why this approach cannot be made performant in large projects. If you are using this approach, the first step should always be to filter syntax nodes on [[REVIEW: pattern match to type or use **kind**, or pattern match if you have work you need a typed value for, and otherwise kind?? Unless its complex enough the pattern can optimize.]]
 
 If the predicate is non-trivial, use a method you access via a method group to keep your generator readable.
 
@@ -42,10 +42,10 @@ In all cases, the transform should return an instance of a type with value equal
 
 The transform receives a context which contains a `GeneratorSyntaxContext` which contains the `SyntaxNode` and the corresponding semantic model of the compilation. Examples of you you can call `GetDeclaredSymbol` passing a `ClassDeclarationSyntax` to retrieve the `ITypeSymbol` and use it to retrieve the class members. Writing predicates and transforms will require an understanding of Roslyn [[ Bill: Can you supply a link?]]
 
-Sometimes the additional information determines that you do not need the node for genera  case you should return a marker value such as null that can be filtered later.
+Sometimes the additional information determines that you do not need the node for general  case you should return a marker value such as null that can be filtered later.
 
 [[ Review, is this slow and is anything else slow? ]]
-You should not do expensive operations against the semantic model such as finding all references [[ find the actual name]]
+You should not do expensive operations against the semantic model such as finding all references **you can't**[[ find the actual name]]
 
 When required multiple syntax providers may return different domain models which can be combined later in the pipeline.
 
@@ -469,3 +469,5 @@ This helper method reduces the boilerplate in tests to include a common set of u
 ``````
 
 With code like this, creating a new scenario just involves creating a new scenario type and adding it to the test theory.
+
+Next Step: [Further transformations](further-tranformations.md)

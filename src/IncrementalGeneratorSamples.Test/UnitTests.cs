@@ -1,4 +1,5 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
+using System.Collections.Immutable;
 
 namespace IncrementalGeneratorSamples.Test
 {
@@ -60,7 +61,8 @@ namespace IncrementalGeneratorSamples.Test
         public Task Root_command_model(string className, params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
-                                .Select(t => GetInputSource(t, x => x.CommandModel));
+                                .Select(t => GetInputSource(t, x => x.CommandModel))
+                                .ToImmutableArray();
 
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
@@ -85,7 +87,8 @@ namespace IncrementalGeneratorSamples.Test
         public Task Generated_cli_partial_code(string className, params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
-                .Select(t => GetInputSource(t, x => x.CommandModel));
+                .Select(t => GetInputSource(t, x => x.CommandModel))
+                .ToImmutableArray();
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
             var outputCode = CodeOutput.PartialCli(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);
@@ -100,7 +103,8 @@ namespace IncrementalGeneratorSamples.Test
         public Task Generated_root_command_code(string className, params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
-                .Select(t => GetInputSource(t, x => x.CommandModel));
+                .Select(t => GetInputSource(t, x => x.CommandModel))
+                .ToImmutableArray();
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
             var outputCode = CodeOutput.RootCommandCode(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);

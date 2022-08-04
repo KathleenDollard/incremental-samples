@@ -8,8 +8,6 @@ ms.topic: tutorial
 ---
 # Incremental source generator pipeline
 
-[[ Review: The spec shows RegisterExecutionPipeline. Is this an old form of pipeline registration? ]]
-
 Roslyn incremental source generators are based on a pipeline of operations. A pipeline is a set of functions defined as delegates. When the pipeline executes, the output of each function is the input to the next function. The pipeline itself performs operations between steps, and can determine whether steps are run. In the case of incremental generators, the pipeline only runs steps when their results are used and their input has changed from the cached values of the input. 
 
 It is important to understand that pipelines area a series of steps that are defined once and used many times. You define a Roslyn incremental generator pipeline in the generator's `Initialize` method, which runs only once. In most pipelines, including the Roslyn incremental source generator, the output of each step is a generic container allowing the infrastructure of the pipeline to be unaware of the contents within the container.
@@ -26,8 +24,6 @@ There is a great deal of theoretical work around these types of containers withi
 * The pipeline does not need to know the contents of the containers, although the functions that make up the pipeline do.
 * The pipeline can intervene after any step to provide features like cancellation and skipping further steps if the input is unchanged based on caching.
 * The pipeline will not do unnecessary work - if a value is not used, it's value is not calculated.
-
-[[ Review:  The spec refers to IValueProvider<T>, but I cannot find this interface. Is this now just a logical grouping of the ..Value.. and ..Values.. providers? (That is how I wrote this article) ]]
 
 The incremental generator pipeline supports two container types: `IncrementalValueProvider<T>` and `IncrementalValuesProvider<T>`. Notice that the first has a singular and the second plural for `Value`, because one contains a single value and the other a collection of. The operations to create these containers are [providers](#providers). The available [pipeline operations](#pipeline-operations) transform the containers, and the pipeline ends by [outputting source code](#output) using one or more `RegisterSourceOutput` or `RegisterImplementationSourceOutput` methods. The central elements of a pipeline are the generic containers - for incremental generators, this is the incremental value providers.
 
@@ -50,8 +46,6 @@ This table abbreviates `IncrementalValueProvider` and `IncrementalValuesProvider
 | `AnalyzerConfigOptionsProvider` | `...Value...<AnalyzerConfigOptionsProvider>`  |
 | `MetadataReferencesProvider`    | `...Values...<MetadataReference>`              |
 | `ParseOptionsProvider`          | `...Value...<ParseOptions>`                   |
-
-[[ Review: confirm the following with team: do we/can we cache non-syntax providers? ]]
 
 The incremental value providers for the properties (all of the above except the `SyntaxValueProvider`) contain instances of classes that cannot be cached. The next step for all of these should be to call [`Select`](#pipeline-operations) to extract the data you need into a model.
 

@@ -14,6 +14,6 @@ namespace IncrementalGeneratorSamples.Runtime
         public RootCommand RootCommand
             => Command is RootCommand root
                 ? root
-                : throw new InvalidOperationException("The root command may have been reset.");
+                : throw new InvalidOperationException("Unexpected type");
     }
 }

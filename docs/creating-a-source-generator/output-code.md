@@ -10,3 +10,4 @@ Break complex code into methods that return fragment of the code you want to cre
 
 This example builds on the design of the [Further transformations article](further-transformations.md#example). You can see how this code is used in [Putting it all together](putting-it-all-together.md#example).
 
+Next Step: [Putting it all together](putting-it-all-together.md)

@@ -192,3 +192,5 @@ The input for the transformation test is the `initialClassModel`. An example of 
 ```
 
 You can [read more about using Verify for testing in the article on the initial transformation]().
+
+Next Step: [Outputting code](output-code.md).

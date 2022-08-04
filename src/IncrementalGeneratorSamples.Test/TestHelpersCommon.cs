@@ -59,11 +59,18 @@ public class TestHelpersCommon
     {
         var generator = new TGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation,
-            out var compilation, out var _);
+        try
+        {
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation,
+                out var compilation, out var _);
+            var runResult = driver.GetRunResult();
+            return (compilation, runResult);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
 
-        var runResult = driver.GetRunResult();
-        return (compilation, runResult);
     }
 
     public static void GenerateAndCompileProject<T>(string testInputPath, string testGeneratedCodePath, string generatedSubDirectoryName, OutputKind outputKind)

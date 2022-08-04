@@ -1,4 +1,12 @@
-# Design input data
+---
+title: Designing generator input
+description: Before coding your generator, understand where you will get the necessary input.
+author: KathleenDollard
+ms.author: kdollard
+ms.date: 6/11/2022 
+ms.topic: conceptual
+---
+# Design generator input
 
 Input data can come from several sources as discussed in [pipelines subsection]
 
@@ -120,3 +128,5 @@ It's helpful to review the code you intend to create and record the information 
 There are restrictions on some of the values the user can enter, and it is good to identify the analyzers that you probably want to write to accompany your generator. In this case, there are a small number of valid return types from the execute method and the only generics that are allowed in option types is `IEnumerable<T>`.
 
 This is a greatly simplified approach to `System.CommandLine` and if you would like to further explore generation, you might want to add features, such as adding arguments or subcommands.
+
+Next Step: [Create models](create-models.md).
