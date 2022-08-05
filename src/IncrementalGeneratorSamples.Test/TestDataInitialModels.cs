@@ -2,7 +2,7 @@
 
 namespace IncrementalGeneratorSamples.Test
 {
-    internal class TestDataInitialModels
+    internal static class TestDataInitialModels
     {
         public static InitialClassModel SimplestPractical
             => new("SimplestPractical",

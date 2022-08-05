@@ -5,7 +5,6 @@ namespace IncrementalGeneratorSamples.InternalModels
 {
     public class CommandModel : ModelCommon
     {
-        private List<CommandModel> commands;
         public CommandModel(string name,
                             string originalName,
                             string symbolName,
@@ -16,7 +15,6 @@ namespace IncrementalGeneratorSamples.InternalModels
                             IEnumerable<OptionModel> options)
         : base(name, originalName, symbolName, localSymbolName, aliases, description)
         {
-            commands = new List<CommandModel>();
             Options = options;
             Namespace = nspace;
         }

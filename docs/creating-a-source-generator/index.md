@@ -9,8 +9,8 @@ ms.topic: overview
 # Creating a source generator
 
 - [Design output](design-output.md)
-- [Design input data](design-input-data.md)
 - [Create models](create-models.md)
+- [Design input data](design-input-data.md)
 - [Initial filtering](initial-filtering.md)
 - [Supply further transformations (optional)](further-tranformations.md)
 - [Output code](output-code.md)

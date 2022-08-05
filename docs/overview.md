@@ -148,6 +148,38 @@ Once code is generated, the user cannot change it. This is enforced by Visual St
 
 To create code the user can edit, use [.NET templating]().
 
+### Generated code must be in a separate `SyntaxTree` or file
+
+The code you generate is added to the compilation as a new `SyntaxTree`, and appears in the IDE as a separate file that appears in solution explorer in Dependencies/Analyzers/name of generator. You can combine user-written code and generated code into a single class using partial classes.
+
+### Generators cannot run any code of the project they are compiling
+
+It can be difficult to imagine your the source code of your application as a block of data that cannot be executed, but during compilation that is what your code is - data. For example, given the following code:
+
+```csharp
+var x = 2 + 3;
+```
+
+You can access `x` only as a specific `SyntaxNode` and `ISymbol` that has no value. Since no code runs, there is no value and the value `5` is never associated with this line of code [[ right, optimizations are not visible? ]]. `2 + 3` is another specific `SyntaxNode` and `ISymbol`, as are `2`, `3` and `+`.
+
+In this simple case, you could retrieve the string values of 2 and 3 from the syntax nodes. However, you cannot handle all cases and we recommend analyzers to limit input to the simplest forms that can express user intent. In this case, that would be the value 5.
+
+### Generators cannot reliably run code that is not part of the NuGet package
+
+Generators are use a host specific assembly load context. This is host specific because hosts have different needs. Assembly load behavior of generators is an implementation detail that is highly complex, will change as needed and cannot reliably load any code not in the NuGet package. In addition, any assembly loading would have unacceptable performance impact. 
+
+### Generators should not throw, even on invalid input code
+
+Generators do not need to output code when inputs are invalid, but, they must not throw exceptions. If they do, the generator will fail with no message, or a cryptic message. Generators should be very protective of any possible exceptions.
+
+### Generated code always runs in the context of the user's source code
+
+This may be obvious, but the code your generator creates will run in an unknown context. You do not know what settings will be present for warnings, code style, or null reference types. For example, your generated code may run in a project that requires XML comments and has `WarningsAsErrors` set to true. In that context, if you fail to include XML comments, your generator will break the user's ability to compile their project!
+
+As a result, generators should be written with the expectation of most warning turned on. 
+
+[[ Review: is code style fixed after generators run? ]]
+
 ### Generators cannot be ordered or dependent
 
 Each generator is independent and does not rely on any other generator. Any mechanism for ordering or dependency between generators will eventually result in a conflict with no realistic route to resolution by the user of conflicting generators.

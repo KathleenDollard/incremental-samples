@@ -12,12 +12,13 @@ The first step of a generator is determining what you want to output. Failing to
 
 Identify the code that makes up your working application or library in one of these categories;
 
-- Code the user will write or that is expected to be part the user's project.
-- Supporting code, probably in a separate project/library.
-- Code you will generate.
-- If a library, code that exercises your generation.
+- _User written code_ that the user will write as part the their project.
+- _Supporting code_, probably in a separate project/library.
+- _Generated code_.
 
-The code you will generate needs to be isolated into separate files. 
+Your generator will extract information from a user written code, and possibly other inputs, transform that data to a format friendly to generation, and output generated code that may use supporting code during execution.
+
+[The overview covers limitations and rules for generation](../overview.md#limitations-of-generators).
 
 Test the application or library with unit tests or with manual tests to ensure it works correctly.
 
@@ -41,7 +42,7 @@ This results in a single class `A` that has a `B` and a `C` property. The compil
 
 Partial classes may contain partial methods. There are two types of partial methods that are distinguished by whether there is a scope, such as `public` or `private`. In both types of partial methods, not more than one of the partial methods can have an implementation. The two types imply whether the user or the generator supplies the implementation.
 
-All of the portions of a partial class must be in the same assembly (project) and namespace.
+All of the portions of a partial class must be in the same assembly (project) and namespace. This makes them very useful for interactions between user 
 
 ### Partial methods without a specified scope
 
@@ -412,4 +413,4 @@ The explicit interface implementation along with a protected virtual property pr
 
 Before creating your generator, ensure that you are creating the correct code by testing your sample project through a combination of manual and unit tests. 
 
-Next Step: [Design input](design-input-data.md)
+Next Step: [Design models](design-models.md)

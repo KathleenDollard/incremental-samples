@@ -1,0 +1,8 @@
+﻿{
+  Namespace: MyNamespace,
+  CommandSymbolNames: [
+    SimplestPractical,
+    WithOneProperty,
+    WithMultipleProperties
+  ]
+}

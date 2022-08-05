@@ -37,7 +37,7 @@ namespace IncrementalGeneratorSamples
         public static CommandModel GetCommandModel(InitialClassModel classModel,
                                             CancellationToken cancellationToken)
         {
-            // null is not expected, but may happen with invalid code
+            // null should have been filtered out, but finding one is not a reason to crash
             if (classModel is null) { return null; }
 
             var aliases = Helpers.GetAttributeValues(classModel.Attributes, "AliasAttribute");

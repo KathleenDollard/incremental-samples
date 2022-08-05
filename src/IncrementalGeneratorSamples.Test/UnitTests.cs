@@ -8,12 +8,17 @@ namespace IncrementalGeneratorSamples.Test
     public class UnitTests
     {
         private static T GetInputSource<T>(Type inputDataType, Func<TestData, T> getPart)
-            where T : class?
-        {
-            return Activator.CreateInstance(inputDataType) is TestData testData
-                            ? getPart(testData) as T
-                            : throw new ArgumentException("Unexpected test input type", nameof(inputDataType));
-        }
+            where T : class? 
+            => Activator.CreateInstance(inputDataType) is TestData testData
+                ? getPart(testData) as T
+                : throw new ArgumentException("Unexpected test input type", nameof(inputDataType));
+
+        private static string GetClassName(Type[] inputDataTypes)
+            => inputDataTypes.Length == 1
+                ? inputDataTypes.First().Name
+                : $"{inputDataTypes.First().Name}_Plus_{inputDataTypes.Length - 1}";
+
+
 
         [Theory]
         [InlineData( typeof(SimplestPractical))]
@@ -42,15 +47,16 @@ namespace IncrementalGeneratorSamples.Test
 
 
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithOneProperty", typeof(WithOneProperty))]
-        [InlineData("WithMulitipeProperties", typeof(WithMultipleProperties))]
-        [InlineData("WithXmlDescripions", typeof(WithXmlDescriptions))]
-        [InlineData("WithAliasAttributes", typeof(WithAliasAttributes))]
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(WithOneProperty))]
+        [InlineData( typeof(WithMultipleProperties))]
+        [InlineData( typeof(WithXmlDescriptions))]
+        [InlineData( typeof(WithAliasAttributes))]
 
-        public Task Command_model(string className, Type inputDataType)
+        public Task Command_model(Type inputDataType)
         {
             var initialModel = GetInputSource(inputDataType, x => x.InitialClassModel);
+            var className = inputDataType.Name;
 
             var commandModel = ModelBuilder.GetCommandModel(initialModel, TestHelpersCommon.CancellationTokenForTesting);
 
@@ -58,13 +64,14 @@ namespace IncrementalGeneratorSamples.Test
         }
 
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithThreeCommands", typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
-        public Task Root_command_model(string className, params Type[] inputDataTypes)
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
+        public Task Root_command_model( params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
                                 .Select(t => GetInputSource(t, x => x.CommandModel))
                                 .ToImmutableArray();
+            var className = GetClassName(inputDataTypes);
 
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
@@ -84,13 +91,15 @@ namespace IncrementalGeneratorSamples.Test
 
 
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithThreeCommands", typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
-        public Task Generated_cli_partial_code(string className, params Type[] inputDataTypes)
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
+        public Task Generated_cli_partial_code(params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
                 .Select(t => GetInputSource(t, x => x.CommandModel))
                 .ToImmutableArray();
+            var className = GetClassName(inputDataTypes);
+
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
             var outputCode = CodeOutput.PartialCli(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);
@@ -98,15 +107,15 @@ namespace IncrementalGeneratorSamples.Test
             return Verifier.Verify(outputCode).UseDirectory("Snapshots").UseTextForParameters(className);
         }
 
-
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithThreeCommands", typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
-        public Task Generated_root_command_code(string className, params Type[] inputDataTypes)
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(SimplestPractical), typeof(WithOneProperty), typeof(WithMultipleProperties))]
+        public Task Generated_root_command_code(params Type[] inputDataTypes)
         {
             var commandModels = inputDataTypes
                 .Select(t => GetInputSource(t, x => x.CommandModel))
                 .ToImmutableArray();
+            var className = GetClassName(inputDataTypes);
             var rootCommandModel = ModelBuilder.GetRootCommandModel(commandModels, TestHelpersCommon.CancellationTokenForTesting);
 
             var outputCode = CodeOutput.RootCommandCode(rootCommandModel, TestHelpersCommon.CancellationTokenForTesting);
@@ -115,16 +124,17 @@ namespace IncrementalGeneratorSamples.Test
         }
 
         [Theory]
-        [InlineData("SimplestPractical", typeof(SimplestPractical))]
-        [InlineData("WithOneProperty", typeof(WithOneProperty))]
-        [InlineData("WithMulitipeProperties", typeof(WithMultipleProperties))]
-        [InlineData("WithXmlDescripions", typeof(WithXmlDescriptions))]
-        [InlineData("WithAliasAttributes", typeof(WithAliasAttributes))]
-        public Task Generated_command_code(string className, Type inputDataType)
+        [InlineData( typeof(SimplestPractical))]
+        [InlineData( typeof(WithOneProperty))]
+        [InlineData( typeof(WithMultipleProperties))]
+        [InlineData( typeof(WithXmlDescriptions))]
+        [InlineData( typeof(WithAliasAttributes))]
+        public Task Generated_command_code( Type inputDataType)
         {
             var commandModel = Activator.CreateInstance(inputDataType) is TestData testData
                 ? testData.CommandModel
                 : throw new ArgumentException("Unexpected test input type", nameof(inputDataType));
+            var className = inputDataType.Name;
 
             var outputCode = CodeOutput.CommandCode(commandModel, TestHelpersCommon.CancellationTokenForTesting);
 

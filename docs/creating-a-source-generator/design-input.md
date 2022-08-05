@@ -10,6 +10,8 @@ ms.topic: conceptual
 
 Input data can come from several providers as discussed in [Pipelines](pipelines.md). This section will focus on designing input for use with those syntax providers, focusing on a design that uses attribute syntax provider.
 
+Remember that your code is just data. Nothing will run. The user must express even complex things via simple code. If they call a method, you will know the name of the method they called, and may use this as data such as retrieving the parameter types. The method will not run during generation, and is simply data. 
+
 ## Attributes
 
 Attributes are useful in designing input and also allow very fast generation. The RegEx generator in .NET 7 is a good example. This is an optimizing generator, and the non-optimized code version of this code is:
