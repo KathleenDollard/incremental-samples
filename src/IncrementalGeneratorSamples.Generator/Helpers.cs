@@ -58,12 +58,12 @@ namespace IncrementalGeneratorSamples
             }
         }
 
-        public static string AsPublicSymbol(this string val)
+        public static string AsSymbol(this string val)
            => char.IsUpper(val[0])
             ? val
             : char.ToUpperInvariant(val[0]) + val.Substring(1);
 
-        public static string AsPrivateSymbol(this string val)
+        public static string AsLocalSymbol(this string val)
             => char.IsLower(val[0])
             ? val
             : char.ToLowerInvariant(val[0]) + val.Substring(1);

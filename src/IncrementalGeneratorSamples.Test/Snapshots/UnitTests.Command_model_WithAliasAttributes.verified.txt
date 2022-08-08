@@ -1,25 +1,21 @@
 ﻿{
   Namespace: MyNamespace,
+  Name: WithAliasAttributes,
+  DisplayName: with-alias-attributes,
+  Aliases: [
+    command-alias
+  ],
+  Description: ,
   Options: [
     {
       Type: string?,
-      Name: --property-one,
-      OriginalName: PropertyOne,
-      SymbolName: PropertyOne,
-      LocalSymbolName: propertyOne,
+      Name: PropertyOne,
+      DisplayName: --property-one,
       Aliases: [
         --p,
         -prop1
       ],
       Description: 
     }
-  ],
-  Name: with-alias-attributes,
-  OriginalName: WithAliasAttributes,
-  SymbolName: WithAliasAttributes,
-  LocalSymbolName: withAliasAttributes,
-  Aliases: [
-    command-alias
-  ],
-  Description: 
+  ]
 }

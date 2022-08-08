@@ -1,38 +1,30 @@
 ﻿{
   Namespace: MyNamespace,
+  Name: WithMultipleProperties,
+  DisplayName: with-multiple-properties,
+  Aliases: [],
+  Description: ,
   Options: [
     {
       Type: string?,
-      Name: --property-one,
-      OriginalName: PropertyOne,
-      SymbolName: PropertyOne,
-      LocalSymbolName: propertyOne,
+      Name: PropertyOne,
+      DisplayName: --property-one,
       Aliases: [],
       Description: 
     },
     {
       Type: int,
-      Name: --property-two,
-      OriginalName: PropertyTwo,
-      SymbolName: PropertyTwo,
-      LocalSymbolName: propertyTwo,
+      Name: PropertyTwo,
+      DisplayName: --property-two,
       Aliases: [],
       Description: 
     },
     {
       Type: System.IO.FileInfo,
-      Name: --property-three,
-      OriginalName: PropertyThree,
-      SymbolName: PropertyThree,
-      LocalSymbolName: propertyThree,
+      Name: PropertyThree,
+      DisplayName: --property-three,
       Aliases: [],
       Description: 
     }
-  ],
-  Name: with-multiple-properties,
-  OriginalName: WithMultipleProperties,
-  SymbolName: WithMultipleProperties,
-  LocalSymbolName: withMultipleProperties,
-  Aliases: [],
-  Description: 
+  ]
 }

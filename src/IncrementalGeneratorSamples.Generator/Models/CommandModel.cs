@@ -3,23 +3,28 @@ using System.Collections.Generic;
 
 namespace IncrementalGeneratorSamples.InternalModels
 {
-    public class CommandModel : ModelCommon
+    public class CommandModel
     {
         public CommandModel(string name,
-                            string originalName,
-                            string symbolName,
-                            string localSymbolName,
+                            string displayName,
                             IEnumerable<string> aliases,
                             string description,
                             string nspace,
                             IEnumerable<OptionModel> options)
-        : base(name, originalName, symbolName, localSymbolName, aliases, description)
         {
-            Options = options;
+            Name = name;
+            DisplayName = displayName;
+            Aliases = aliases;
+            Description = description;
             Namespace = nspace;
+            Options = options;
         }
 
         public string Namespace { get; }
+        public string Name { get; }
+        public string DisplayName { get; }
+        public IEnumerable<string> Aliases { get; }
+        public string Description { get; }
         public IEnumerable<OptionModel> Options { get; }
 
         public override bool Equals(object obj)

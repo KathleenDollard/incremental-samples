@@ -18,7 +18,7 @@ There is a great deal of theoretical work around these types of containers withi
 
 [[ Bill: Can we suggest books: Buonanno's is quite good. ]]
 
-* The pipeline contains functions - delegates or lambda expressions.
+* The pipeline uses your delegates or lambda expressions.
 * The pipeline does not execute until requested.
 * The pipeline operates on a generic container.
 * The pipeline does not need to know the contents of the containers, although the functions that make up the pipeline do.

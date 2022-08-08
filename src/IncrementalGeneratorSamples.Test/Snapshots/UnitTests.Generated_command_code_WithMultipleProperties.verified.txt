@@ -16,8 +16,8 @@ public partial class WithMultipleProperties
 
         // Create System.CommandLine options
         private Option<string?> propertyOneOption = new Option<string?>("--property-one", "");
-        private Option<int> PropertyTwoOption = new Option<int>("--property-two", "");
-        private Option<System.IO.FileInfo> PropertyThreeOption = new Option<System.IO.FileInfo>("--property-three", "");
+        private Option<int> propertyTwoOption = new Option<int>("--property-two", "");
+        private Option<System.IO.FileInfo> propertyThreeOption = new Option<System.IO.FileInfo>("--property-three", "");
 
         // Base constructor creates System.CommandLine and optins are added here
         private CommandHandler()
@@ -25,15 +25,15 @@ public partial class WithMultipleProperties
         {
             
             Command.AddOption(propertyOneOption);
-            Command.AddOption(PropertyTwoOption);
-            Command.AddOption(PropertyThreeOption);
+            Command.AddOption(propertyTwoOption);
+            Command.AddOption(propertyThreeOption);
         }
 
         // The code invoked when the user runs the command
         protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new WithMultipleProperties(GetValueForSymbol(propertyOneOption, commandResult), GetValueForSymbol(PropertyTwoOption, commandResult), GetValueForSymbol(PropertyThreeOption, commandResult));
+            var command = new WithMultipleProperties(GetValueForSymbol(propertyOneOption, commandResult), GetValueForSymbol(propertyTwoOption, commandResult), GetValueForSymbol(propertyThreeOption, commandResult));
             return command.Execute();
         }
     }

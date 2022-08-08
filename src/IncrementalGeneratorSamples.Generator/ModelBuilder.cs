@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Xml.Linq;
 
 namespace IncrementalGeneratorSamples
 {
@@ -48,19 +49,15 @@ namespace IncrementalGeneratorSamples
                 cancellationToken.ThrowIfCancellationRequested();
                 var optionAliases = Helpers.GetAttributeValues(property.Attributes, "AliasAttribute");
                 options.Add(new OptionModel(
-                    $"--{property.Name.AsKebabCase()}",
-                    property.Name,
-                    property.Name.AsPublicSymbol(),
-                    property.Name.AsPrivateSymbol(),
-                    optionAliases,
-                    Helpers.GetXmlDescription(property.XmlComments),
-                    property.Type.ToString()));
+                    name:property.Name,
+                    displayName: $"--{property.Name.AsKebabCase()}",
+                    aliases: optionAliases,
+                    description: Helpers.GetXmlDescription(property.XmlComments),
+                    type: property.Type.ToString()));
             }
             return new CommandModel(
-                    name: classModel.Name.AsKebabCase(),
-                    originalName: classModel.Name,
-                    symbolName: classModel.Name.AsPublicSymbol(),
-                    localSymbolName: classModel.Name.AsPrivateSymbol(),
+                    name: classModel.Name,
+                    displayName: classModel.Name.AsKebabCase(),
                     aliases,
                     Helpers.GetXmlDescription(classModel.XmlComments),
                     classModel.Namespace,
@@ -71,8 +68,8 @@ namespace IncrementalGeneratorSamples
         //    => GetRootCommandModel(classModels, CancellationToken.None);
 
         public static RootCommandModel GetRootCommandModel(ImmutableArray<CommandModel> classModels, CancellationToken _)
-            => classModels.Any()
-                ? new RootCommandModel(classModels.First().Namespace, classModels.Select(m => m.SymbolName))
+        => classModels.Any()
+                ? new RootCommandModel(classModels.First().Namespace, classModels.Select(m => m.Name.AsSymbol()))
                 : null;
     }
 }

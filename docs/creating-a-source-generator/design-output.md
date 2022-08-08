@@ -197,12 +197,19 @@ Managing project and package references during development can be challenging an
 
 ### The generated code
 
-This generated code of this example needs two different things: 
+#### `Cli` classes
 
-- A `Cli` class that allows the user to interact, and especially to `Invoke` the Cli to run the application.
-- Extensions to the command class to support System.CommandLine.
+This example generates code for three different file patterns:
 
-The `Cli` class needs to be present when the user starts the application, it is the user's main access point. It also needs to support generated code that performs the actual invocation. This is most easily provided with two partial classes. One is created always created and contains the common portions of the `Cli` class and a partial method call:
+- A `cli.g.cs` file with a partial class that is always present and allows the user to interact with the CLI and get started with the generator. 
+- A `cli.partial.g.cs` file with a partial class that is generated only when there are commands and defines the commands and allows it to be run.
+- A separate file for each command that defines command details and allows it to be run.
+
+The file `cli.g.cs` always exists when there is a package reference to the generator and the file `cli.partial.g.cs` is present only when there is at least one class in the user's source code marked with the `Command` attribute. 
+
+This partial class technique is a lightweight approach to giving programmers using your generator to initially access it. When the programmer uses your generator, in this case by defining commands, the second part of the partial is generated. This is particularly important if the generator will be present in analyzer packages where it may not be run [[ Review, check that generators can be combined with analyzers in a package ]].
+
+The constant part of the `Cli` partial class is:
 
 ```c#
 // generated file: cli.g.cs
@@ -238,11 +245,11 @@ namespace IncrementalGeneratorSamples
 
 The `#pragma warning` is needed because the `rootCommand` may be set in the `SetRootCommand` method, and thus should not be `readonly`. Generated code is compiled in the context of the application your user's are creating. Assume they have stringent warnings and errors to avoid creating a problem for them that they cannot fix.
 
-`SetRootCommand` is a [partial method without a scope](#partial-methods-without-a-specified-scope). This means the call to it will be removed if there is no partial class that implements the method. If a project references this generator, but does not have any class marked with the `[Command]` attribute, the other portion of this partial class will not be generated, `SetRootCommand` will have a value of null and a message will be displayed to the user. 
+`SetRootCommand` is a [partial method without a scope](#partial-methods-without-a-specified-scope). This means the call to it will be removed if there is no partial class that implements the method. If the project references this generator, but does not have any class marked with the `[Command]` attribute, the other portion of this partial class will not be generated, `SetRootCommand` will have a value of null and a message will be displayed to the user.
 
-Both parts of the partial class  must be in the user assembly, so the file above must be generated. If they were combined into one file, it would need to contain conditional code to manage their being no commands, and it would have to always be generated so the `Cli` class would appear in IntelliSense.
+Both parts of the partial class  must be in the user assembly, so the file above must be generated. If they were combined into one file, it would need to contain conditional code to manage their being no commands, and it would have to always be generated so the `Cli` class would appear in IntelliSense when the user is first starting with your generator.
 
-When the source code includes classes that are decorated with the `[Command]` attribute, additional files are generated. The `cli.partial.g.cs` contains the implementation for the partial `SetRootCommand` method. The only variable part of this file is the namespace of the `RootCommand`:
+When the source code defines commands by including classes that are decorated with the `[Command]` attribute, additional files are generated. The `cli.partial.g.cs` contains the implementation for the partial `SetRootCommand` method and code to support System.CommandLine:
 
 ```csharp
 // generated file: cli.partial.g.cs
@@ -252,16 +259,32 @@ namespace IncrementalGeneratorSamples
     {
         static partial void SetRootCommand()
         {
-            var rootHandler = TestExample.RootCommand.CommandHandler.Instance;
+            var rootHandler = CommandHandler.Instance;
             rootCommand = rootHandler.RootCommand;
+        }
+
+        internal class CommandHandler : RootCommandHandler<CommandHandler>
+        {
+            // Manage singleton instance
+            public static CommandHandler Instance = new CommandHandler();
+
+            public CommandHandler() : base(string.Empty)
+            {
+                Command.Add(TestExample.ReadFile.CommandHandler.Instance.Command);
+                Command.Add(TestExample.AddLine.CommandHandler.Instance.Command);
+            }
         }
     }
 }
 ```
 
-The file `cli.g.cs` always exists when there is a package reference to the generator and the file `cli.partial.g.cs` is present only when there is at least one class in the user's source code marked with the `Command` attribute. When that attribute is not present and the `cli.partial.g.cs` file is not present, there is no `SetRootCommand` implementation and the call to it is removed during compilation. Partial classes here support the different behavior depending on whether the user is accessing features of the generator in their code.
+The code to support System.CommandLine will very rarely be used by programmers, so it is tucked away in a partial class that limits the impact it has on IDE features like IntelliSense. This also limits the changes to the `Cli` class that occur due to generation. Consider whether it will be surprising to programmers using your generator to see big changes to their IntelliSense display. 
 
-in addition to the `Cli` class, a partial class is created for each class the user marked with the `Command` attribute. This class is System.CommandLine details with comments explaining the actions. Here is the partial class created for the `Addline` class shown above:
+The `CommandHandler` nested class includes a singleton property that ensures there is only one instance of the type. In the constructor, it adds each of the specified commands to the protected SystemCommandLine `Command` instance that is created in the base class.
+
+#### Command specific files
+
+A partial class is created for each class the user decorated with the `Command` attribute. This class is System.CommandLine details and includes comments explaining its actions. Here is the partial class created for the `Addline` class shown above:
 
 ```csharp
 // generated file: AddLine.g.cs 
@@ -303,38 +326,13 @@ public partial class AddLine
 }
 ```
 
-This adds minimal members to the user's class because adding unnecessary elements to the IntelliSense displayed for their classes may be surprising to the programmer. It only adds the `CommandHandler` nested class. A nested class is helpful to keep generated implementation details tucked out of sight. The `CommandHandler` nested class includes a singleton property that ensures there is only one instance of the type. It also has fields for the options that correspond to the properties of the `AddLine` class. In the constructor, it adds these options to the internal SystemCommandLine `Command` instance that is created in the base class. The `AddLine` class had an `Execute` method, so an `Invoke` method is included in the generated class.
+This uses a nested class for the `CommandHandler` details because the System.CommandLine details aren't likely to interest the programmer using the generator - they are using the generator to avoid these details.
 
-The `RootCommand` is generated to manage the specific commands, such as `AddLine`. The Cli has exactly one root command. Similar to the individual commands, this class has a `CommandHandler` nested class with a singleton `Instance` property:
+#### Base classes
 
-```c#
-// generated file: RootCommand.g.cs 
-using IncrementalGeneratorSamples.Runtime;
+The base classes used above are included here for reference.
 
-#nullable enable
-
-namespace TestExample;
-
-public class RootCommand
-{
-    internal class CommandHandler : RootCommandHandler<CommandHandler>
-    {
-        // Manage singleton instance
-        public static RootCommand.CommandHandler Instance = new RootCommand.CommandHandler();
-
-        public CommandHandler() : base(string.Empty)
-        {
-            Command.Add(ReadFile.CommandHandler.Instance.Command);
-            Command.Add(AddLine.CommandHandler.Instance.Command);
-        }
-    }
-}
-
-```
-
-The constructor of the generated `RootCommand` adds all of the generated commands to root command.
-
-The `RootCommand` nested `CommandHandler` class inherits from the `RootCommandHandler` class of the `IncrementalSamples.Runtime` library. `IncrementalSamples.Runtime.RootCommandHandler` inherits from  `IncrementalSamples.Runtime.CommandHandler` shown below and adds special handling for the command. Code in `Cli.g.cs`  uses the `RootCommand` property:
+The `RootCommand` nested `CommandHandler` class inherits from the `RootCommandHandler` class which is part of the `IncrementalSamples.Runtime` library:
 
 ```csharp
 // Library file in IncrementalGeneratorSamples.Runtime: RootCommandHandler.cs
@@ -359,7 +357,9 @@ namespace IncrementalGeneratorSamples.Runtime
 }
 ```
 
-Each `CommandHandler` nested class class derives from the `CommandHandlerBase` class. This base class manages the System.CommandLine details and is part of the runtime library for the example project:
+`IncrementalSamples.Runtime.RootCommandHandler` inherits from  `IncrementalSamples.Runtime.CommandHandler` and adds special handling for the root command. In System.CommandLine, root commands are generally unnamed the `Cli` class expects a handler typed to RootCommand, provided via the `RootCommand` property:
+
+The `RootCommandHandler` nested class and the `CommandHandler` nested class class for each command derive from the `CommandHandlerBase` class. This base class manages the System.CommandLine details and is part of the runtime library for the example project:
 
 ```csharp
 // Library file in IncrementalGeneratorSamples.Runtime: CommandHandler.cs
@@ -411,6 +411,6 @@ The explicit interface implementation along with a protected virtual property pr
 
 ## Testing
 
-Before creating your generator, ensure that you are creating the correct code by testing your sample project through a combination of manual and unit tests. 
+Before creating your generator, ensure that you are creating the correct code by testing your sample project through a combination of manual and unit tests.
 
 Next Step: [Design models](design-models.md)

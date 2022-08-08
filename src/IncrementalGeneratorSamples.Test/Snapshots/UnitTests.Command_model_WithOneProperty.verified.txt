@@ -1,20 +1,16 @@
 ﻿{
   Namespace: MyNamespace,
+  Name: WithOneProperty,
+  DisplayName: with-one-property,
+  Aliases: [],
+  Description: ,
   Options: [
     {
       Type: string?,
-      Name: --property-one,
-      OriginalName: PropertyOne,
-      SymbolName: PropertyOne,
-      LocalSymbolName: propertyOne,
+      Name: PropertyOne,
+      DisplayName: --property-one,
       Aliases: [],
       Description: 
     }
-  ],
-  Name: with-one-property,
-  OriginalName: WithOneProperty,
-  SymbolName: WithOneProperty,
-  LocalSymbolName: withOneProperty,
-  Aliases: [],
-  Description: 
+  ]
 }

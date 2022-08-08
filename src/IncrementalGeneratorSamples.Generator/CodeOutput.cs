@@ -1,7 +1,5 @@
 ﻿using IncrementalGeneratorSamples.InternalModels;
-using System;
 using System.Collections.Generic;
-using System.CommandLine;
 using System.Linq;
 using System.Threading;
 
@@ -10,6 +8,9 @@ namespace IncrementalGeneratorSamples
 
     public class CodeOutput
     {
+        public static string FileName(CommandModel modelData)
+            => $"{modelData?.Name.AsSymbol()}.g.cs";
+
         public const string ConsistentCli = @"
 using System.CommandLine;
 
@@ -39,61 +40,50 @@ namespace IncrementalGeneratorSamples
 }
 ";
 
-        public static string PartialCli(RootCommandModel rootCommandModel, CancellationToken _) 
-            => rootCommandModel is null
-                ? ""
-                : $@"
+        public static string PartialCli(RootCommandModel rootModel, CancellationToken _)
+        {
+            return rootModel is null
+                        ? ""
+                        : $@"
+using IncrementalGeneratorSamples.Runtime;
+using System.CommandLine;
+
+#nullable enable
+
 namespace IncrementalGeneratorSamples
 {{
     internal partial class Cli
     {{
         static partial void SetRootCommand()
         {{
-            var rootHandler = {rootCommandModel.Namespace}.RootCommand.CommandHandler.Instance;
+            var rootHandler = CommandHandler.Instance;
             rootCommand = rootHandler.RootCommand;
         }}
-    }}
-}}
-";
 
-        public static string RootCommandCode(RootCommandModel rootCommandModel, CancellationToken cancellationToken)
-        {
-            return rootCommandModel is null
-                ? ""
-                : $@"
-using IncrementalGeneratorSamples.Runtime;
-
-#nullable enable
-
-namespace {rootCommandModel.Namespace};
-
-public class RootCommand
-{{
-    internal class CommandHandler : RootCommandHandler<CommandHandler>
-    {{
-        // Manage singleton instance
-        public static RootCommand.CommandHandler Instance = new RootCommand.CommandHandler();
-
-        public CommandHandler() : base(string.Empty)
+        internal class CommandHandler : RootCommandHandler<CommandHandler>
         {{
-            {CtorAssignments(rootCommandModel.CommandSymbolNames)}
+            // Manage singleton instance
+            public static CommandHandler Instance = new CommandHandler();
+
+            public CommandHandler() : base(string.Empty)
+            {{
+                {CtorAssignments(rootModel.Namespace, rootModel.CommandSymbolNames)}
+            }}
         }}
     }}
 }}
-";
-            string CtorAssignments(IEnumerable<string> commandNames)
-                => string.Join("\n            ", commandNames.Select(c => $"Command.Add({c}.CommandHandler.Instance.Command);"));
-        }
 
-        public static string FileName(CommandModel modelData)
-            => $"{modelData?.SymbolName}.g.cs";
+";
+            string CtorAssignments(string nspace, IEnumerable<string> commandNames)
+                => string.Join("\n            ", commandNames.Select(c => $"Command.Add({nspace}.{c}.CommandHandler.Instance.Command);"));
+
+        }
 
         public static string CommandCode(CommandModel commandModel, CancellationToken cancellationToken)
         {
-            if (commandModel is null)
-            { return ""; }
-
-            return $@"
+            return commandModel is null
+                ? ""
+                : $@"
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IncrementalGeneratorSamples.Runtime;
@@ -102,58 +92,57 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace {commandModel.Namespace};
 
-public partial class {commandModel.SymbolName}
+public partial class {commandModel.Name.AsSymbol()}
 {{
     internal class CommandHandler : CommandHandlerBase
     {{
         // Manage singleton instance
-        public static {commandModel.SymbolName}.CommandHandler Instance {{ get; }} = new {commandModel.SymbolName}.CommandHandler();
+        public static {commandModel.Name.AsSymbol()}.CommandHandler Instance {{ get; }} = new {commandModel.Name.AsSymbol()}.CommandHandler();
 
         // Create System.CommandLine options
         {OptionFields(commandModel.Options)}
 
-        // Base constructor creates System.CommandLine and optins are added here
+        // Base constructor creates System.CommandLine and options are added here
         private CommandHandler()
-            : base({commandModel.Name.InQuotes()}, {commandModel.Description.InQuotes()})
+            : base({commandModel.DisplayName.InQuotes()}, {commandModel.Description.InQuotes()})
         {{
             {CommandAliases(commandModel)}
-            {OptionAssign(commandModel.Options)}
+            {OptionAssignments(commandModel.Options)}
         }}
 
         // The code invoked when the user runs the command
         protected override int Invoke(InvocationContext invocationContext)
         {{
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new {commandModel.SymbolName}({CommandParams(commandModel.Options)});
+            var command = new {commandModel.Name.AsSymbol()}({CommandParams(commandModel.Options)});
             return command.Execute();
         }}
     }}
 }}
 ";
-
             string OptionFields(IEnumerable<OptionModel> options)
                 => string.Join("\n        ", options.Select(o =>
-                    $"private Option<{o.Type}> {o.LocalSymbolName}Option = new Option<{o.Type}>({OptionAlias(o)}, {o.Description.InQuotes()});"));
+                    $"private Option<{o.Type}> {o.Name.AsLocalSymbol()}Option = new Option<{o.Type}>({OptionAliases(o)}, {o.Description.InQuotes()});"));
 
-            string OptionAlias(OptionModel option)
+            string OptionAliases(OptionModel option)
             {
-                var aliases = new List<string>() { option.Name.InQuotes() };
+                var aliases = new List<string>() { option.DisplayName.InQuotes() };
                 aliases.AddRange(option.Aliases);
                 return string.Join(", ", aliases);
             }
 
-            object CommandAliases(CommandModel model)
+            string CommandAliases(CommandModel model)
             {
                 if (model.Aliases is null || !model.Aliases.Any())
                     { return ""; }
                 return string.Join("\n            ", model.Aliases.Select(a => $"Command.AddAlias({a});"));
             }
 
-            string OptionAssign(IEnumerable<OptionModel> options)
-                => string.Join("\n            ", options.Select(o => $"Command.AddOption({o.LocalSymbolName}Option);"));
+            string OptionAssignments(IEnumerable<OptionModel> options)
+                => string.Join("\n            ", options.Select(o => $"Command.AddOption({o.Name.AsLocalSymbol()}Option);"));
 
             string CommandParams(IEnumerable<OptionModel> options)
-                => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.LocalSymbolName}Option, commandResult)"));
+                => string.Join(", ", options.Select(o => $"GetValueForSymbol({o.Name.AsLocalSymbol()}Option, commandResult)"));
 
         }
 
