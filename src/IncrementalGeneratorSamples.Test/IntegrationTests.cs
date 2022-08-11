@@ -4,30 +4,7 @@ namespace IncrementalGeneratorSamples.Test
 {
     public class IntegrationTests
     {
-        private readonly IntegrationTestFromSourceConfiguration withMultipleProperties;
-
-        public IntegrationTests()
-        {
-            withMultipleProperties =
-            new("TestOutputSimpleFileRead")
-            {
-                OutputKind = OutputKind.ConsoleApplication,
-            };
-            var commandClass = @"
-using IncrementalGeneratorSamples.Runtime;
-
-namespace MyNamespace
-{
-    [Command]
-    public class WithMultipleProperties
-    {
-        public string? PropertyOne{ get; set; }
-        public int PropertyTwo{ get; set; }
-        public FileInfo? PropertyThree{ get; set; }
-    }
-}";
-           
-            var mainMethod = @"
+        private readonly string mainMethod = @"
 namespace MyNamespace;
 
 internal class Program
@@ -38,74 +15,108 @@ internal class Program
     }
 }";
 
-            withMultipleProperties.AddSource(commandClass);
-            withMultipleProperties.AddSource(mainMethod);
-        }
+        private static string DotnetVersion = "";
+        private static string TestInputPath(string testSetName, string currentPath) 
+            => Path.Combine(currentPath, @$"../../../../{testSetName}");
+        private static string GeneratedSubDirectoryName = "GeneratedViaTest";
+        private static string TestBuildPath(string testInputPath, string dotnetVersion) 
+            => Path.Combine(testInputPath, "bin", "Debug", dotnetVersion);
+        private static string ProgramFilePath(string testInputPath) 
+            => Path.Combine(testInputPath, "Program.cs");
 
-        [Fact] // (Skip ="froze VS")]
+
+        [Fact]
 #pragma warning disable IDE1006 // the weird naming is because I really want this to appear first in the set 
-        public void _GeneratorHealthCheck() 
+        public void _GeneratorHealthCheck()
 #pragma warning restore IDE1006
         {
-            var inputCompilation = TestHelpersCommon.GetInputCompilation<Generator>(
-                    withMultipleProperties.OutputKind,
-                    withMultipleProperties.InputSourceCode);
-            Assert.Empty(TestHelpersCommon.WarningAndErrors(inputCompilation.GetDiagnostics())
-                        .Where(x=>x.Id != "CS0103")); // expected because no Cli class 
-            var (outputCompilation, driverResults) = TestHelpersCommon.Generate<Generator>(inputCompilation);
-            Assert.Empty(TestHelpersCommon.WarningAndErrors(driverResults.Diagnostics));
+            // Get input compilation and ensure it has not errors
+            var inputCompilation = TestHelpers.GetInputCompilation<Generator>(
+                    outputKind: OutputKind.ConsoleApplication,
+                    explicitUsings: null,
+                    TestData.GetData<SimplestPractical>().InputSourceCode,
+                         mainMethod);
+            Assert.Empty(TestHelpers.WarningAndErrors(inputCompilation.GetDiagnostics())
+                        .Where(x => x.Id != "CS0103")); // expected because no Cli class 
+
+            // Generate and ensure there are no generation errors
+            var (outputCompilation, driverResults) = TestHelpers.Generate<Generator>(inputCompilation);
+            Assert.Empty(TestHelpers.WarningAndErrors(driverResults.Diagnostics));
+
+            // Check output
             var outputSyntaxTree = driverResults
                                     .GeneratedTrees
-                                    .Single(x=> !(new string[] { "Cli.g.cs", "Cli.Partial.g.cs","Root.g.cs" }.Contains(Path.GetFileName(x.FilePath))));
-            var output = outputSyntaxTree.ToString();
-            Assert.True( output.Length > 200);
+                                    .FirstOrDefault(x => x.FilePath.EndsWith("Cli.g.cs"));
+            Assert.NotNull(outputSyntaxTree);
+            Assert.Equal(CodeOutput.ConsistentCli, outputSyntaxTree!.ToString());
         }
 
-//        var expected = $@"
-//using System.CommandLine;
-//using System.CommandLine.Invocation;
-//using IncrementalGeneratorSamples.Runtime;
 
-//#nullable enable
+        [Theory]
+        [InlineData("SimpleFileRead")]
 
-//namespace MyNamespace;
+#pragma warning disable IDE1006 // the weird naming is because I really want this to appear first in the set 
+        public Task SimpleFileRead(string testSetName)
+#pragma warning restore IDE1006
+        {
+            var testInputPath = TestInputPath(testSetName, Environment.CurrentDirectory);
+            var exeCompile = TestHelpers.CompileOutput(testInputPath);
+            Assert.NotNull(exeCompile);
+            Assert.True(exeCompile!.HasExited);
+            Assert.Equal(0, exeCompile.ExitCode);
 
-//public partial class WithMultipleProperties
-//{{
-//    internal class CommandHandler : CommandHandlerBase
-//    {{
-//        // Manage singleton instance
-//        public static WithMultipleProperties.CommandHandler Instance {{ get; }} = new WithMultipleProperties.CommandHandler();
+            var exeOutput = TestHelpers.RunCommand(TestBuildPath(testInputPath, DotnetVersion),testSetName, "-h");
+            return Verifier.Verify(exeOutput).UseDirectory("Snapshots").UseTextForParameters("Run SimpleFileRead");
 
-//        // Create System.CommandLine options
-//        private Option<string?> propertyOneOption = new Option<string?>(""--property-one"", """");
-//        private Option<int> propertyTwoOption = new Option<int>(""--property - two"", """");
-//        private Option<System.IO.FileInfo?> propertyThreeOption = new Option<System.IO.FileInfo?>(""--property - three"", """");
+        }
 
-//        // Base constructor creates System.CommandLine and optins are added here
-//        private CommandHandler()
-//            : base(""with - multiple - properties"", """")
-//        {{
-//            {{
 
-//                Command.AddOption(propertyOneOption);
-//                Command.AddOption(propertyTwoOption);
-//                Command.AddOption(propertyThreeOption);
-//            }}
-//        }}
 
-//        // The code invoked when the user runs the command
-//        protected override int Invoke(InvocationContext invocationContext)
-//        {{
-//            {{
-//                var commandResult = invocationContext.ParseResult.CommandResult;
-//                var command = new WithMultipleProperties(GetValueForSymbol(propertyOneOption, commandResult), GetValueForSymbol(propertyTwoOption, commandResult), GetValueForSymbol(propertyThreeOption, commandResult));
-//                return command.Execute();
-//            }}
-//        }}
-//    }}
-//}}
-//";
+        //        var expected = $@"
+        //using System.CommandLine;
+        //using System.CommandLine.Invocation;
+        //using IncrementalGeneratorSamples.Runtime;
+
+        //#nullable enable
+
+        //namespace MyNamespace;
+
+        //public partial class WithMultipleProperties
+        //{{
+        //    internal class CommandHandler : CommandHandlerBase
+        //    {{
+        //        // Manage singleton instance
+        //        public static WithMultipleProperties.CommandHandler Instance {{ get; }} = new WithMultipleProperties.CommandHandler();
+
+        //        // Create System.CommandLine options
+        //        private Option<string?> propertyOneOption = new Option<string?>(""--property-one"", """");
+        //        private Option<int> propertyTwoOption = new Option<int>(""--property - two"", """");
+        //        private Option<System.IO.FileInfo?> propertyThreeOption = new Option<System.IO.FileInfo?>(""--property - three"", """");
+
+        //        // Base constructor creates System.CommandLine and optins are added here
+        //        private CommandHandler()
+        //            : base(""with - multiple - properties"", """")
+        //        {{
+        //            {{
+
+        //                Command.AddOption(propertyOneOption);
+        //                Command.AddOption(propertyTwoOption);
+        //                Command.AddOption(propertyThreeOption);
+        //            }}
+        //        }}
+
+        //        // The code invoked when the user runs the command
+        //        protected override int Invoke(InvocationContext invocationContext)
+        //        {{
+        //            {{
+        //                var commandResult = invocationContext.ParseResult.CommandResult;
+        //                var command = new WithMultipleProperties(GetValueForSymbol(propertyOneOption, commandResult), GetValueForSymbol(propertyTwoOption, commandResult), GetValueForSymbol(propertyThreeOption, commandResult));
+        //                return command.Execute();
+        //            }}
+        //        }}
+        //    }}
+        //}}
+        //";
 
 
         //[Fact]

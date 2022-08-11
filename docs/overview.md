@@ -164,9 +164,9 @@ You can access `x` only as a specific `SyntaxNode` and `ISymbol` that has no val
 
 In this simple case, you could retrieve the string values of 2 and 3 from the syntax nodes. However, you cannot handle all cases and we recommend analyzers to limit input to the simplest forms that can express user intent. In this case, that would be the value 5.
 
-### Generators cannot reliably run code that is not part of the NuGet package
+### The generator and all its dependencies must be located in the NuGet package
 
-Generators are use a host specific assembly load context. This is host specific because hosts have different needs. Assembly load behavior of generators is an implementation detail that is highly complex, will change as needed and cannot reliably load any code not in the NuGet package. In addition, any assembly loading would have unacceptable performance impact. 
+The compiler host will ensure all the libraries present in a NuGet package are available to the generator at compilation time. Different compiler hosts will use different strategies for loading assemblies and several will copy dependencies before loading them. Custom assembly loading logic is not supported for generators, analyzers and suppressors.
 
 ### Generators should not throw, even on invalid input code
 

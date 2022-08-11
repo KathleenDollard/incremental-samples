@@ -1,0 +1,31 @@
+﻿
+using IncrementalGeneratorSamples.Runtime;
+using System.CommandLine;
+
+#nullable enable
+
+namespace IncrementalGeneratorSamples
+{
+    internal partial class Cli
+    {
+        static partial void SetRootCommand()
+        {
+            var rootHandler = CommandHandler.Instance;
+            rootCommand = rootHandler.RootCommand;
+        }
+
+        internal class CommandHandler : RootCommandHandler<CommandHandler>
+        {
+            // Manage singleton instance
+            public static CommandHandler Instance = new CommandHandler();
+
+            public CommandHandler() : base(string.Empty)
+            {
+                Command.Add(MyNamespace.SimplestPractical.CommandHandler.Instance.Command);
+            Command.Add(MyNamespace.WithOneProperty.CommandHandler.Instance.Command);
+            Command.Add(MyNamespace.WithMultipleProperties.CommandHandler.Instance.Command);
+            }
+        }
+    }
+}
+

@@ -19,6 +19,18 @@ namespace IncrementalGeneratorSamples.Test
         public string InputSourceCode { get; }
         public InitialClassModel? InitialClassModel { get; }
         public CommandModel? CommandModel { get; }
+
+        public static TestData GetData(Type t)
+            => Activator.CreateInstance(t) is TestData testData
+                ? testData
+                : throw new ArgumentException("Unexpected test input type", nameof(t));
+
+        public static T GetData<T>()
+            where T : TestData
+            => Activator.CreateInstance<T>() is T testData
+                ? testData
+                : throw new ArgumentException("Unexpected test input type", nameof(T));
+
     }
 
     public class SimplestPractical : TestData

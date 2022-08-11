@@ -3,6 +3,7 @@ using IncrementalGeneratorSamples;
 using IncrementalGeneratorSamples.InternalModels;
 using IncrementalGeneratorSamples.Test;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Benchmarks
 {
@@ -17,7 +18,8 @@ namespace Benchmarks
         {
             InputCode = new WithMultipleProperties().InputSourceCode;
             XmlDocs = new WithXmlDescriptions().InitialClassModel?.XmlComments ?? "";
-            var (_, symbol, _, cancellationToken, inputDiagnostics) = TestHelpers.GetTransformInfoForClass(InputCode, x => x.Identifier.ToString() == "MyClass");
+            var (symbol, cancellationToken, inputDiagnostics) = 
+                    TestHelpers.GetSymbolForSynatax<ClassDeclarationSyntax>(InputCode, x => x.Identifier.ToString() == "MyClass");
             Symbol = symbol is null
                     ? throw new InvalidOperationException("symbol not found")
                     : symbol;

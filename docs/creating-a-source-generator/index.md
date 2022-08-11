@@ -12,12 +12,12 @@ ms.topic: overview
 - [Create models](create-models.md)
 - [Design input data](design-input-data.md)
 - [Initial filtering](initial-filtering.md)
-- [Supply further transformations (optional)](further-tranformations.md)
+- [Further transformations (optional)](further-tranformations.md)
 - [Output code](output-code.md)
-- [Putting it all together](putting-it-all-together.md)
-- [Testing generation]()
-- [End to end testing]()
-- [Reporting diagnostics]()
+- [Put it all together](putting-it-all-together.md)
+- [Integration testing](integration-testing.md)
+- [Deploy to NuGet](deploying-nuget.md)
+- Report diagnostics
   
 Creating a generators is a multi-step process. You need to determine what you are going to build, what input you need, create initial filters, possibly supply further transformations and create code to output. This walk-through goes through these steps in order. If you want a peek at how they fit together before your get started, you can read  [Putting it all together](putting-it-all-together.md) and reread it when you understand the contributing steps.
 

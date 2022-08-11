@@ -141,26 +141,26 @@
 //        [Fact]
 //        public void Can_compile_input()
 //        {
-//            var inputCompilation = TestHelpers.GetInputCompilation<Generator>(OutputKind.DynamicallyLinkedLibrary, SimpleClass);
+//            var inputCompilation = TestHelpersCommon.GetInputCompilation<Generator>(OutputKind.DynamicallyLinkedLibrary, SimpleClass);
 //            Assert.NotNull(inputCompilation);
-//            Assert.Empty(TestHelpers.ErrorAndWarnings(inputCompilation));
+//            Assert.Empty(TestHelpersCommon.WarningAndErrors(inputCompilation.GetDiagnostics()));
 //        }
 
 //        [Fact]
 //        public void Can_generate_test()
 //        {
-//            var inputCompilation = TestHelpers.GetInputCompilation<Generator>(
+//            var inputCompilation = TestHelpersCommon.GetInputCompilation<Generator>(
 //                OutputKind.DynamicallyLinkedLibrary, SimpleClass);
 //            Assert.NotNull(inputCompilation);
-//            Assert.Empty(TestHelpers.ErrorAndWarnings(inputCompilation));
+//            Assert.Empty(TestHelpersCommon.WarningAndErrors(inputCompilation.GetDiagnostics()));
 
-//            var (outputCompilation, runResult) = TestHelpers.GenerateTrees<Generator>(
+//            var (outputCompilation, runResult) = TestHelpersCommon.GenerateTrees<Generator>(
 //                inputCompilation);
 //            var trees = runResult.GeneratedTrees;
 //            Assert.NotNull(outputCompilation);
-//            Assert.Empty(TestHelpers.ErrorAndWarnings(runResult.Diagnostics));
+//            Assert.Empty(TestHelpersCommon.WarningAndErrors(runResult.Diagnostics));
 
-//            Assert.Equal(4,trees.Count());
+//            Assert.Equal(4, trees.Count());
 //            Assert.Equal(expected1, trees[0].ToString());
 //            Assert.Equal(expected2, trees[1].ToString());
 //            Assert.Equal(expected3, trees[2].ToString());

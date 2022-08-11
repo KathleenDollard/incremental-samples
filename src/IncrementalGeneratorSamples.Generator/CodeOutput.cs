@@ -120,6 +120,11 @@ public partial class {commandModel.Name.AsSymbol()}
     }}
 }}
 ";
+            string CommandAliases(CommandModel model) 
+                => model.Aliases is null || !model.Aliases.Any()
+                    ? ""
+                    : string.Join("\n            ", model.Aliases.Select(a => $"Command.AddAlias({a});"));
+
             string OptionFields(IEnumerable<OptionModel> options)
                 => string.Join("\n        ", options.Select(o =>
                     $"private Option<{o.Type}> {o.Name.AsLocalSymbol()}Option = new Option<{o.Type}>({OptionAliases(o)}, {o.Description.InQuotes()});"));
@@ -129,13 +134,6 @@ public partial class {commandModel.Name.AsSymbol()}
                 var aliases = new List<string>() { option.DisplayName.InQuotes() };
                 aliases.AddRange(option.Aliases);
                 return string.Join(", ", aliases);
-            }
-
-            string CommandAliases(CommandModel model)
-            {
-                if (model.Aliases is null || !model.Aliases.Any())
-                    { return ""; }
-                return string.Join("\n            ", model.Aliases.Select(a => $"Command.AddAlias({a});"));
             }
 
             string OptionAssignments(IEnumerable<OptionModel> options)

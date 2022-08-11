@@ -7,21 +7,21 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace MyNamespace;
 
-public partial class WithAliasAttributes
+public partial class WithXmlDescriptions
 {
     internal class CommandHandler : CommandHandlerBase
     {
         // Manage singleton instance
-        public static WithAliasAttributes.CommandHandler Instance { get; } = new WithAliasAttributes.CommandHandler();
+        public static WithXmlDescriptions.CommandHandler Instance { get; } = new WithXmlDescriptions.CommandHandler();
 
         // Create System.CommandLine options
-        private Option<string?> propertyOneOption = new Option<string?>("--property-one", --p, -prop1, "");
+        private Option<string?> propertyOneOption = new Option<string?>("--property-one", "This is the first property");
 
-        // Base constructor creates System.CommandLine and optins are added here
+        // Base constructor creates System.CommandLine and options are added here
         private CommandHandler()
-            : base("with-alias-attributes", "")
+            : base("with-xml-descriptions", "This class is named WithXmlDescriptions")
         {
-            Command.AddAlias(command-alias);
+            
             Command.AddOption(propertyOneOption);
         }
 
@@ -29,7 +29,7 @@ public partial class WithAliasAttributes
         protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new WithAliasAttributes(GetValueForSymbol(propertyOneOption, commandResult));
+            var command = new WithXmlDescriptions(GetValueForSymbol(propertyOneOption, commandResult));
             return command.Execute();
         }
     }

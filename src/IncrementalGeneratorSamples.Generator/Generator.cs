@@ -9,7 +9,7 @@ namespace IncrementalGeneratorSamples
     {
         public void Initialize(IncrementalGeneratorInitializationContext initContext)
         {
-            // Initial extraction - there may be multiple for some generators
+            // Initial extraction - creates models that have value equality
             var classModelValues = initContext.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     fullyQualifiedMetadataName: "IncrementalGeneratorSamples.Runtime.CommandAttribute",
@@ -30,7 +30,7 @@ namespace IncrementalGeneratorSamples
             initContext.RegisterPostInitializationOutput((postinitContext) =>
                 postinitContext.AddSource("Cli.g.cs", CodeOutput.ConsistentCli));
 
-            // Output code on einput could produce several outputs, and the reverse
+            // Output code that depends on input
             initContext.RegisterSourceOutput(
                 rootCommandValue,
                 (outputContext, rootModel) =>
@@ -42,12 +42,6 @@ namespace IncrementalGeneratorSamples
                 (outputContext, model) =>
                         outputContext.AddSource(CodeOutput.FileName(model),
                              CodeOutput.CommandCode(model, outputContext.CancellationToken)));
-
-            initContext.RegisterSourceOutput(
-                rootCommandValue,
-                (outputContext, rootModel) =>
-                        outputContext.AddSource("Root.g.cs",
-                            CodeOutput.RootCommandCode(rootModel, outputContext.CancellationToken)));
 
         }
 

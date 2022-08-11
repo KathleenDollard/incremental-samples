@@ -19,7 +19,7 @@ public partial class WithMultipleProperties
         private Option<int> propertyTwoOption = new Option<int>("--property-two", "");
         private Option<System.IO.FileInfo> propertyThreeOption = new Option<System.IO.FileInfo>("--property-three", "");
 
-        // Base constructor creates System.CommandLine and optins are added here
+        // Base constructor creates System.CommandLine and options are added here
         private CommandHandler()
             : base("with-multiple-properties", "")
         {

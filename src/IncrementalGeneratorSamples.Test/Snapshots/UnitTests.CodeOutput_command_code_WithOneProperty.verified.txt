@@ -7,29 +7,29 @@ using IncrementalGeneratorSamples.Runtime;
 
 namespace MyNamespace;
 
-public partial class SimplestPractical
+public partial class WithOneProperty
 {
     internal class CommandHandler : CommandHandlerBase
     {
         // Manage singleton instance
-        public static SimplestPractical.CommandHandler Instance { get; } = new SimplestPractical.CommandHandler();
+        public static WithOneProperty.CommandHandler Instance { get; } = new WithOneProperty.CommandHandler();
 
         // Create System.CommandLine options
-        
+        private Option<string?> propertyOneOption = new Option<string?>("--property-one", "");
 
-        // Base constructor creates System.CommandLine and optins are added here
+        // Base constructor creates System.CommandLine and options are added here
         private CommandHandler()
-            : base("simplest-practical", "")
+            : base("with-one-property", "")
         {
             
-            
+            Command.AddOption(propertyOneOption);
         }
 
         // The code invoked when the user runs the command
         protected override int Invoke(InvocationContext invocationContext)
         {
             var commandResult = invocationContext.ParseResult.CommandResult;
-            var command = new SimplestPractical();
+            var command = new WithOneProperty(GetValueForSymbol(propertyOneOption, commandResult));
             return command.Execute();
         }
     }

@@ -18,7 +18,7 @@ This example builds on the design of [Design output](design-output.md#example). 
 
 ### Discovering the data
 
-Discovering the input data needed by the generator requires evaluating the [code marked as generated in the example project](design-output.md#example). A file will be generated for each command, such as `ReadFile` or `AddLine`. Files will also be generated to support access to the commands. `Cli.g.cs` is generated as a constant partial class so that the programmer using the generator always has access to the expected static methods. This should contain no information. `Cli.partial.g.cs` and `RootCommand.g.cs` will be generated and also need to be reviewed. 
+Discovering the input data needed by the generator requires evaluating the [code marked as generated in the example project](design-output.md#example). A file will be generated for each command, such as `ReadFile` or `AddLine`. Files will also be generated to support access to the commands. `Cli.g.cs` is generated as a constant partial class so that the programmer using the generator always has access to the expected static methods. This should contain no information. `Cli.partial.g.cs` will be generated and also needs to be reviewed.
 
 Evaluating the [code in the generated AddLine method of the example project](design-output.md#example) shows these values will be needed for the generator:
 
